@@ -25,6 +25,12 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
+        hostname: "res-console.cloudinary.com",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
         hostname: "images.pexels.com",
         pathname: "/**",
       },
@@ -48,6 +54,12 @@ const nextConfig: NextConfig = {
   hostname: "encrypted-tbn0.gstatic.com",
   pathname: "/**",
 },
+ {
+        protocol: "https",
+        hostname: "static-01.daraz.com.bd",
+        port: "",
+        pathname: "/**",
+      },
     ],
   },
 };

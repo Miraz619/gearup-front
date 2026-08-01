@@ -1,10 +1,10 @@
-
 import { Button } from "@/components/ui/button";
 import { getSingleGear } from "@/service/getSingleGear";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CreateRentalForm } from "../_actions/_components/CreateRentalForm";
+import { CreateRentalForm } from "../_components/CreateRentalForm";
+
 
 type CreateRentalPageProps = {
   searchParams: Promise<{

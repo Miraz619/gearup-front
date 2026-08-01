@@ -1,445 +1,11 @@
-// import { Badge } from "@/components/ui/badge";
-// import { Button } from "@/components/ui/button";
-// import {
-//   Card,
-//   CardContent,
-//   CardHeader,
-//   CardTitle,
-// } from "@/components/ui/card";
-// import { getMyRentals } from "@/service/getMyRentals";
-// import type {
-//   CustomerRental,
-//   RentalStatus,
-// } from "@/types/rental";
-// import {
-//   CalendarDays,
-//   CheckCircle2,
-//   Clock3,
-//   CreditCard,
-//   Package,
-//   ReceiptText,
-//   ShoppingBag,
-// } from "lucide-react";
-// import Link from "next/link";
-
-// const statusLabel: Record<RentalStatus, string> = {
-//   PLACED: "Placed",
-//   CONFIRMED: "Confirmed",
-//   PAID: "Paid",
-//   PICKED_UP: "Picked Up",
-//   RETURNED: "Returned",
-//   CANCELLED: "Cancelled",
-// };
-
-// const statusClassName: Record<RentalStatus, string> = {
-//   PLACED:
-//     "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-300",
-//   CONFIRMED:
-//     "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-900 dark:bg-blue-950 dark:text-blue-300",
-//   PAID:
-//     "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300",
-//   PICKED_UP:
-//     "border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-900 dark:bg-violet-950 dark:text-violet-300",
-//   RETURNED:
-//     "border-teal-200 bg-teal-50 text-teal-700 dark:border-teal-900 dark:bg-teal-950 dark:text-teal-300",
-//   CANCELLED:
-//     "border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300",
-// };
-
-// function formatDate(date: string) {
-//   return new Intl.DateTimeFormat("en-GB", {
-//     day: "2-digit",
-//     month: "short",
-//     year: "numeric",
-//   }).format(new Date(date));
-// }
-
-// function formatCurrency(value: string | number) {
-//   return Number(value).toLocaleString("en-BD", {
-//     maximumFractionDigits: 2,
-//   });
-// }
-
-// function getRentalDays(
-//   startDate: string,
-//   endDate: string,
-// ) {
-//   const difference =
-//     new Date(endDate).getTime() -
-//     new Date(startDate).getTime();
-
-//   return Math.max(
-//     1,
-//     Math.ceil(difference / (1000 * 60 * 60 * 24)),
-//   );
-// }
-
-// function RentalCard({
-//   rental,
-// }: {
-//   rental: CustomerRental;
-// }) {
-//   const rentalDays = getRentalDays(
-//     rental.startDate,
-//     rental.endDate,
-//   );
-
-//   return (
-//     <Card className="overflow-hidden border-border/70 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
-//       <CardHeader className="border-b bg-muted/20 px-5 py-5 sm:px-6">
-//         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-//           <div>
-//             <div className="flex flex-wrap items-center gap-2">
-//               <CardTitle className="text-lg">
-//                 Rental #{rental.id.slice(0, 8).toUpperCase()}
-//               </CardTitle>
-
-//               <Badge
-//                 variant="outline"
-//                 className={
-//                   statusClassName[rental.status]
-//                 }
-//               >
-//                 {statusLabel[rental.status]}
-//               </Badge>
-//             </div>
-
-//             <p className="mt-2 text-sm text-muted-foreground">
-//               Created on {formatDate(rental.createdAt)}
-//             </p>
-//           </div>
-
-//           <div className="rounded-xl border bg-background px-4 py-3 sm:text-right">
-//             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-//               Total amount
-//             </p>
-
-//             <p className="mt-1 text-2xl font-bold text-primary">
-//               ৳{formatCurrency(rental.totalAmount)}
-//             </p>
-//           </div>
-//         </div>
-//       </CardHeader>
-
-//       <CardContent className="space-y-6 p-5 sm:p-6">
-//         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-//           <div className="rounded-xl border p-4">
-//             <div className="flex items-center gap-2 text-muted-foreground">
-//               <CalendarDays className="size-4" />
-
-//               <span className="text-xs font-semibold uppercase tracking-wide">
-//                 Start date
-//               </span>
-//             </div>
-
-//             <p className="mt-2 font-semibold">
-//               {formatDate(rental.startDate)}
-//             </p>
-//           </div>
-
-//           <div className="rounded-xl border p-4">
-//             <div className="flex items-center gap-2 text-muted-foreground">
-//               <CalendarDays className="size-4" />
-
-//               <span className="text-xs font-semibold uppercase tracking-wide">
-//                 End date
-//               </span>
-//             </div>
-
-//             <p className="mt-2 font-semibold">
-//               {formatDate(rental.endDate)}
-//             </p>
-//           </div>
-
-//           <div className="rounded-xl border p-4">
-//             <div className="flex items-center gap-2 text-muted-foreground">
-//               <Clock3 className="size-4" />
-
-//               <span className="text-xs font-semibold uppercase tracking-wide">
-//                 Duration
-//               </span>
-//             </div>
-
-//             <p className="mt-2 font-semibold">
-//               {rentalDays}{" "}
-//               {rentalDays === 1 ? "day" : "days"}
-//             </p>
-//           </div>
-
-//           <div className="rounded-xl border p-4">
-//             <div className="flex items-center gap-2 text-muted-foreground">
-//               <Package className="size-4" />
-
-//               <span className="text-xs font-semibold uppercase tracking-wide">
-//                 Equipment
-//               </span>
-//             </div>
-
-//             <p className="mt-2 font-semibold">
-//               {rental.items.length}{" "}
-//               {rental.items.length === 1
-//                 ? "item"
-//                 : "items"}
-//             </p>
-//           </div>
-//         </div>
-
-//         <div>
-//           <h3 className="font-semibold">
-//             Rented equipment
-//           </h3>
-
-//           <div className="mt-3 overflow-hidden rounded-xl border">
-//             <div className="divide-y">
-//               {rental.items.map((item) => (
-//                 <div
-//                   key={item.id}
-//                   className="grid gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
-//                 >
-//                   <div className="min-w-0">
-//                     <p className="font-medium">
-//                       {item.gearItem.name}
-//                     </p>
-
-//                     <p className="mt-1 text-sm text-muted-foreground">
-//                       {item.gearItem.brand} · Quantity:{" "}
-//                       {item.quantity} · ৳
-//                       {formatCurrency(item.pricePerDay)}
-//                       /day
-//                     </p>
-//                   </div>
-
-//                   <div className="sm:text-right">
-//                     <p className="text-xs text-muted-foreground">
-//                       Subtotal
-//                     </p>
-
-//                     <p className="mt-1 font-semibold">
-//                       ৳{formatCurrency(item.subtotal)}
-//                     </p>
-//                   </div>
-//                 </div>
-//               ))}
-//             </div>
-//           </div>
-//         </div>
-
-//         <div className="flex flex-col gap-4 rounded-xl border bg-muted/20 p-4 sm:flex-row sm:items-center sm:justify-between">
-//           <div>
-//             <div className="flex items-center gap-2">
-//               {rental.payment?.status ===
-//               "COMPLETED" ? (
-//                 <CheckCircle2 className="size-4 text-emerald-600" />
-//               ) : (
-//                 <CreditCard className="size-4 text-muted-foreground" />
-//               )}
-
-//               <p className="font-semibold">
-//                 Payment status
-//               </p>
-//             </div>
-
-//             <p className="mt-1 text-sm text-muted-foreground">
-//               {rental.payment?.status === "COMPLETED"
-//                 ? `Paid through ${rental.payment.method}`
-//                 : rental.status === "CONFIRMED"
-//                   ? "This order is ready for payment."
-//                   : "Payment will be available after provider confirmation."}
-//             </p>
-//           </div>
-
-//           {rental.payment?.status === "COMPLETED" ? (
-//             <Badge className="w-fit bg-emerald-600">
-//               Payment Completed
-//             </Badge>
-//           ) : rental.status === "CONFIRMED" ? (
-//             <Button disabled>
-//               <CreditCard className="size-4" />
-//               Pay Now
-//             </Button>
-//           ) : rental.status === "RETURNED" ? (
-//             <Button variant="outline" disabled>
-//               Review Rental
-//             </Button>
-//           ) : null}
-//         </div>
-//       </CardContent>
-//     </Card>
-//   );
-// }
-
-// export default async function CustomerRentalsPage() {
-//   const result = await getMyRentals();
-//   const rentals = result.data;
-
-//   const activeRentals = rentals.filter((rental) =>
-//     [
-//       "PLACED",
-//       "CONFIRMED",
-//       "PAID",
-//       "PICKED_UP",
-//     ].includes(rental.status),
-//   ).length;
-
-//   const completedRentals = rentals.filter(
-//     (rental) => rental.status === "RETURNED",
-//   ).length;
-
-//   const totalPaid = rentals
-//     .filter(
-//       (rental) =>
-//         rental.payment?.status === "COMPLETED",
-//     )
-//     .reduce(
-//       (total, rental) =>
-//         total + Number(rental.payment?.amount ?? 0),
-//       0,
-//     );
-
-//   return (
-//     <div className="space-y-7">
-//       <div>
-//         <Badge variant="secondary">
-//           Customer Rentals
-//         </Badge>
-
-//         <h1 className="mt-3 text-2xl font-bold tracking-tight sm:text-3xl">
-//           My Rentals
-//         </h1>
-
-//         <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-//           Track your rental orders, payment progress,
-//           equipment details, and current rental status.
-//         </p>
-//       </div>
-
-//       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-//         <Card>
-//           <CardContent className="flex items-center gap-4 p-5">
-//             <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
-//               <ReceiptText className="size-5" />
-//             </div>
-
-//             <div>
-//               <p className="text-sm text-muted-foreground">
-//                 Total rentals
-//               </p>
-
-//               <p className="mt-1 text-2xl font-bold">
-//                 {rentals.length}
-//               </p>
-//             </div>
-//           </CardContent>
-//         </Card>
-
-//         <Card>
-//           <CardContent className="flex items-center gap-4 p-5">
-//             <div className="flex size-11 items-center justify-center rounded-xl bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300">
-//               <Clock3 className="size-5" />
-//             </div>
-
-//             <div>
-//               <p className="text-sm text-muted-foreground">
-//                 Active rentals
-//               </p>
-
-//               <p className="mt-1 text-2xl font-bold">
-//                 {activeRentals}
-//               </p>
-//             </div>
-//           </CardContent>
-//         </Card>
-
-//         <Card>
-//           <CardContent className="flex items-center gap-4 p-5">
-//             <div className="flex size-11 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
-//               <CheckCircle2 className="size-5" />
-//             </div>
-
-//             <div>
-//               <p className="text-sm text-muted-foreground">
-//                 Completed
-//               </p>
-
-//               <p className="mt-1 text-2xl font-bold">
-//                 {completedRentals}
-//               </p>
-//             </div>
-//           </CardContent>
-//         </Card>
-
-//         <Card>
-//           <CardContent className="flex items-center gap-4 p-5">
-//             <div className="flex size-11 items-center justify-center rounded-xl bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
-//               <CreditCard className="size-5" />
-//             </div>
-
-//             <div className="min-w-0">
-//               <p className="text-sm text-muted-foreground">
-//                 Total paid
-//               </p>
-
-//               <p className="mt-1 truncate text-2xl font-bold">
-//                 ৳{formatCurrency(totalPaid)}
-//               </p>
-//             </div>
-//           </CardContent>
-//         </Card>
-//       </div>
-
-//       {rentals.length === 0 ? (
-//         <Card>
-//           <CardContent className="flex min-h-96 flex-col items-center justify-center px-6 py-12 text-center">
-//             <div className="flex size-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-//               <ShoppingBag className="size-8" />
-//             </div>
-
-//             <h2 className="mt-5 text-xl font-semibold">
-//               No rentals yet
-//             </h2>
-
-//             <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">
-//               Browse available equipment and create your
-//               first rental order.
-//             </p>
-
-//             <Button className="mt-6" asChild>
-//               <Link href="/gear">
-//                 Browse Gear
-//               </Link>
-//             </Button>
-//           </CardContent>
-//         </Card>
-//       ) : (
-//         <div className="space-y-6">
-//           {rentals.map((rental) => (
-//             <RentalCard
-//               key={rental.id}
-//               rental={rental}
-//             />
-//           ))}
-//         </div>
-//       )}
-//     </div>
-//   );
-// }
-
-
 
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getMyRentals } from "@/service/getMyRentals";
-import type {
-  CustomerRental,
-  RentalStatus,
-} from "@/types/rental";
+import type { CustomerRental, RentalStatus } from "@/types/rental";
+import PayNowButton from "./_components/PayNowButton";
 import {
   CalendarCheck2,
   CalendarDays,
@@ -454,6 +20,7 @@ import {
   WalletCards,
 } from "lucide-react";
 import Link from "next/link";
+import ReviewDialog from "./_components/ReviewDialog";
 
 const statusLabel: Record<RentalStatus, string> = {
   PLACED: "Placed",
@@ -469,8 +36,7 @@ const statusClassName: Record<RentalStatus, string> = {
     "border-amber-300 bg-amber-100 text-amber-800 dark:border-amber-800 dark:bg-amber-950/70 dark:text-amber-300",
   CONFIRMED:
     "border-blue-300 bg-blue-100 text-blue-800 dark:border-blue-800 dark:bg-blue-950/70 dark:text-blue-300",
-  PAID:
-    "border-emerald-300 bg-emerald-100 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300",
+  PAID: "border-emerald-300 bg-emerald-100 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300",
   PICKED_UP:
     "border-violet-300 bg-violet-100 text-violet-800 dark:border-violet-800 dark:bg-violet-950/70 dark:text-violet-300",
   RETURNED:
@@ -484,8 +50,7 @@ const statusCardClassName: Record<RentalStatus, string> = {
     "border-l-amber-500 bg-gradient-to-br from-amber-50 via-white to-orange-50/70 dark:from-amber-950/20 dark:via-card dark:to-orange-950/10",
   CONFIRMED:
     "border-l-blue-500 bg-gradient-to-br from-blue-50 via-white to-cyan-50/70 dark:from-blue-950/20 dark:via-card dark:to-cyan-950/10",
-  PAID:
-    "border-l-emerald-500 bg-gradient-to-br from-emerald-50 via-white to-green-50/70 dark:from-emerald-950/20 dark:via-card dark:to-green-950/10",
+  PAID: "border-l-emerald-500 bg-gradient-to-br from-emerald-50 via-white to-green-50/70 dark:from-emerald-950/20 dark:via-card dark:to-green-950/10",
   PICKED_UP:
     "border-l-violet-500 bg-gradient-to-br from-violet-50 via-white to-fuchsia-50/70 dark:from-violet-950/20 dark:via-card dark:to-fuchsia-950/10",
   RETURNED:
@@ -508,29 +73,15 @@ function formatCurrency(value: string | number) {
   });
 }
 
-function getRentalDays(
-  startDate: string,
-  endDate: string,
-) {
+function getRentalDays(startDate: string, endDate: string) {
   const difference =
-    new Date(endDate).getTime() -
-    new Date(startDate).getTime();
+    new Date(endDate).getTime() - new Date(startDate).getTime();
 
-  return Math.max(
-    1,
-    Math.ceil(difference / (1000 * 60 * 60 * 24)),
-  );
+  return Math.max(1, Math.ceil(difference / (1000 * 60 * 60 * 24)));
 }
 
-function RentalCard({
-  rental,
-}: {
-  rental: CustomerRental;
-}) {
-  const rentalDays = getRentalDays(
-    rental.startDate,
-    rental.endDate,
-  );
+function RentalCard({ rental }: { rental: CustomerRental }) {
+  const rentalDays = getRentalDays(rental.startDate, rental.endDate);
 
   const totalUnits = rental.items.reduce(
     (total, item) => total + item.quantity,
@@ -627,8 +178,7 @@ function RentalCard({
             </div>
 
             <p className="mt-3 font-semibold text-amber-950 dark:text-amber-100">
-              {rentalDays}{" "}
-              {rentalDays === 1 ? "day" : "days"}
+              {rentalDays} {rentalDays === 1 ? "day" : "days"}
             </p>
           </div>
 
@@ -642,8 +192,7 @@ function RentalCard({
             </div>
 
             <p className="mt-3 font-semibold text-emerald-950 dark:text-emerald-100">
-              {totalUnits}{" "}
-              {totalUnits === 1 ? "unit" : "units"}
+              {totalUnits} {totalUnits === 1 ? "unit" : "units"}
             </p>
           </div>
         </div>
@@ -651,23 +200,16 @@ function RentalCard({
         <div>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h3 className="text-lg font-semibold">
-                Rented equipment
-              </h3>
+              <h3 className="text-lg font-semibold">Rented equipment</h3>
 
               <p className="mt-1 text-sm text-muted-foreground">
                 Complete equipment breakdown for this rental.
               </p>
             </div>
 
-            <Badge
-              variant="secondary"
-              className="w-fit"
-            >
+            <Badge variant="secondary" className="w-fit">
               {rental.items.length}{" "}
-              {rental.items.length === 1
-                ? "item"
-                : "items"}
+              {rental.items.length === 1 ? "item" : "items"}
             </Badge>
           </div>
 
@@ -681,58 +223,67 @@ function RentalCard({
 
             <div className="divide-y">
               {rental.items.map((item) => (
-                <div
-                  key={item.id}
-                  className="grid gap-4 px-5 py-4 transition-colors hover:bg-primary/5 md:grid-cols-[minmax(0,1fr)_100px_130px_130px] md:items-center"
-                >
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-3">
-                      <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                        <Package className="size-4" />
-                      </div>
+               <div
+  key={item.id}
+  className="grid gap-4 px-5 py-4 transition-colors hover:bg-primary/5 md:grid-cols-[minmax(0,1fr)_100px_130px_130px] md:items-center"
+>
+  <div className="min-w-0">
+    <div className="flex items-center gap-3">
+      <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+        <Package className="size-4" />
+      </div>
 
-                      <div className="min-w-0">
-                        <p className="truncate font-semibold">
-                          {item.gearItem.name}
-                        </p>
+      <div className="min-w-0">
+        <p className="truncate font-semibold">
+          {item.gearItem.name}
+        </p>
 
-                        <p className="mt-1 truncate text-sm text-muted-foreground">
-                          {item.gearItem.brand}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+        <p className="mt-1 truncate text-sm text-muted-foreground">
+          {item.gearItem.brand}
+        </p>
+      </div>
+    </div>
 
-                  <div className="flex items-center justify-between md:block md:text-center">
-                    <span className="text-sm text-muted-foreground md:hidden">
-                      Quantity
-                    </span>
+    {rental.status === "RETURNED" && (
+      <div className="mt-3">
+        <ReviewDialog
+          gearItemId={item.gearItemId}
+          gearName={item.gearItem.name}
+        />
+      </div>
+    )}
+  </div>
 
-                    <Badge variant="secondary">
-                      {item.quantity}
-                    </Badge>
-                  </div>
+  <div className="flex items-center justify-between md:block md:text-center">
+    <span className="text-sm text-muted-foreground md:hidden">
+      Quantity
+    </span>
 
-                  <div className="flex items-center justify-between md:block md:text-right">
-                    <span className="text-sm text-muted-foreground md:hidden">
-                      Daily price
-                    </span>
+    <Badge variant="secondary">
+      {item.quantity}
+    </Badge>
+  </div>
 
-                    <span className="font-medium">
-                      ৳{formatCurrency(item.pricePerDay)}
-                    </span>
-                  </div>
+  <div className="flex items-center justify-between md:block md:text-right">
+    <span className="text-sm text-muted-foreground md:hidden">
+      Daily price
+    </span>
 
-                  <div className="flex items-center justify-between md:block md:text-right">
-                    <span className="text-sm text-muted-foreground md:hidden">
-                      Subtotal
-                    </span>
+    <span className="font-medium">
+      ৳{formatCurrency(item.pricePerDay)}
+    </span>
+  </div>
 
-                    <span className="font-bold text-primary">
-                      ৳{formatCurrency(item.subtotal)}
-                    </span>
-                  </div>
-                </div>
+  <div className="flex items-center justify-between md:block md:text-right">
+    <span className="text-sm text-muted-foreground md:hidden">
+      Subtotal
+    </span>
+
+    <span className="font-bold text-primary">
+      ৳{formatCurrency(item.subtotal)}
+    </span>
+  </div>
+</div>
               ))}
             </div>
           </div>
@@ -769,9 +320,7 @@ function RentalCard({
             </div>
 
             <div>
-              <p className="font-semibold">
-                Payment status
-              </p>
+              <p className="font-semibold">Payment status</p>
 
               <p className="mt-1 text-sm leading-6 text-muted-foreground">
                 {rental.payment?.status === "COMPLETED"
@@ -791,10 +340,7 @@ function RentalCard({
               Payment Completed
             </Badge>
           ) : rental.status === "CONFIRMED" ? (
-            <Button className="bg-blue-600 text-white hover:bg-blue-700" disabled>
-              <CreditCard className="size-4" />
-              Pay Now
-            </Button>
+            <PayNowButton rentalOrderId={rental.id} />
           ) : rental.status === "RETURNED" ? (
             <Button variant="outline" disabled>
               <Star className="size-4" />
@@ -812,12 +358,7 @@ export default async function CustomerRentalsPage() {
   const rentals = result.data;
 
   const activeRentals = rentals.filter((rental) =>
-    [
-      "PLACED",
-      "CONFIRMED",
-      "PAID",
-      "PICKED_UP",
-    ].includes(rental.status),
+    ["PLACED", "CONFIRMED", "PAID", "PICKED_UP"].includes(rental.status),
   ).length;
 
   const completedRentals = rentals.filter(
@@ -825,15 +366,8 @@ export default async function CustomerRentalsPage() {
   ).length;
 
   const totalPaid = rentals
-    .filter(
-      (rental) =>
-        rental.payment?.status === "COMPLETED",
-    )
-    .reduce(
-      (total, rental) =>
-        total + Number(rental.payment?.amount ?? 0),
-      0,
-    );
+    .filter((rental) => rental.payment?.status === "COMPLETED")
+    .reduce((total, rental) => total + Number(rental.payment?.amount ?? 0), 0);
 
   return (
     <div className="space-y-8">
@@ -852,9 +386,8 @@ export default async function CustomerRentalsPage() {
           </h1>
 
           <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
-            Track every rental, monitor payment progress,
-            review your equipment, and follow each order from
-            booking to return.
+            Track every rental, monitor payment progress, review your equipment,
+            and follow each order from booking to return.
           </p>
         </div>
       </div>
@@ -871,9 +404,7 @@ export default async function CustomerRentalsPage() {
                 Total rentals
               </p>
 
-              <p className="mt-1 text-3xl font-bold">
-                {rentals.length}
-              </p>
+              <p className="mt-1 text-3xl font-bold">{rentals.length}</p>
             </div>
           </CardContent>
         </Card>
@@ -889,9 +420,7 @@ export default async function CustomerRentalsPage() {
                 Active rentals
               </p>
 
-              <p className="mt-1 text-3xl font-bold">
-                {activeRentals}
-              </p>
+              <p className="mt-1 text-3xl font-bold">{activeRentals}</p>
             </div>
           </CardContent>
         </Card>
@@ -907,9 +436,7 @@ export default async function CustomerRentalsPage() {
                 Completed
               </p>
 
-              <p className="mt-1 text-3xl font-bold">
-                {completedRentals}
-              </p>
+              <p className="mt-1 text-3xl font-bold">{completedRentals}</p>
             </div>
           </CardContent>
         </Card>
@@ -945,8 +472,8 @@ export default async function CustomerRentalsPage() {
             </h2>
 
             <p className="mt-3 max-w-md text-sm leading-7 text-muted-foreground">
-              Browse sports and outdoor equipment, choose your
-              dates, and create your first GearUp rental.
+              Browse sports and outdoor equipment, choose your dates, and create
+              your first GearUp rental.
             </p>
 
             <Button size="lg" className="mt-7" asChild>
@@ -960,10 +487,7 @@ export default async function CustomerRentalsPage() {
       ) : (
         <div className="space-y-7">
           {rentals.map((rental) => (
-            <RentalCard
-              key={rental.id}
-              rental={rental}
-            />
+            <RentalCard key={rental.id} rental={rental} />
           ))}
         </div>
       )}
