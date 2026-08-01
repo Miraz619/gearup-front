@@ -34,7 +34,7 @@ export async function CategorySection() {
   return (
     <section className="bg-muted/30 py-16 sm:py-20 lg:py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Section heading */}
+    
         <div className="mx-auto max-w-2xl text-center">
           <Badge variant="secondary">Explore Categories</Badge>
 
@@ -48,7 +48,7 @@ export async function CategorySection() {
           </p>
         </div>
 
-        {/* Empty state */}
+        
         {categories.length === 0 ? (
           <Card className="mx-auto mt-10 max-w-xl text-center">
             <CardHeader>
@@ -66,7 +66,7 @@ export async function CategorySection() {
           </Card>
         ) : (
           <>
-            {/* Category cards */}
+           
             <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
               {categories.map((category) => {
                 const Icon = getCategoryIcon(category.name);
@@ -74,7 +74,7 @@ export async function CategorySection() {
                 return (
                   <Link
                     key={category.id}
-                    href={`/gear?categoryId=${category.id}`}
+                    href={`/gear?category=${category.id}`}
                     className="group"
                   >
                     <Card className="h-full transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg">
