@@ -1,6 +1,7 @@
 import { GearCard } from "@/app/(publicGroup)/_components/GearCard";
 import { GearFilters } from "@/app/(publicGroup)/_components/GearFilters";
 import { Badge } from "@/components/ui/badge";
+import { GearPagination } from "@/app/(publicGroup)/_components/GearPagination";
 import {
   Card,
   CardDescription,
@@ -24,9 +25,7 @@ type GearPageProps = {
   }>;
 };
 
-export default async function GearPage({
-  searchParams,
-}: GearPageProps) {
+export default async function GearPage({ searchParams }: GearPageProps) {
   const params = await searchParams;
 
   const [response, categoryResponse] = await Promise.all([
@@ -58,8 +57,8 @@ export default async function GearPage({
           </h1>
 
           <p className="mt-4 text-base leading-7 text-muted-foreground sm:text-lg">
-            Explore sports and outdoor equipment available from
-            trusted GearUp providers.
+            Explore sports and outdoor equipment available from trusted GearUp
+            providers.
           </p>
         </div>
 
@@ -70,8 +69,7 @@ export default async function GearPage({
             <h2 className="font-semibold">Available Gear</h2>
 
             <p className="mt-1 text-sm text-muted-foreground">
-              {metaData.total}{" "}
-              {metaData.total === 1 ? "item" : "items"} found
+              {metaData.total} {metaData.total === 1 ? "item" : "items"} found
             </p>
           </div>
 
@@ -90,17 +88,24 @@ export default async function GearPage({
               <CardTitle>No gear found</CardTitle>
 
               <CardDescription>
-                No gear matches the selected category or search
-                options. Try changing the filters.
+                No gear matches the selected category or search options. Try
+                changing the filters.
               </CardDescription>
             </CardHeader>
           </Card>
         ) : (
-          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {gears.map((gear) => (
-              <GearCard key={gear.id} gear={gear} />
-            ))}
-          </div>
+          <>
+            <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {gears.map((gear) => (
+                <GearCard key={gear.id} gear={gear} />
+              ))}
+            </div>
+
+            <GearPagination
+              currentPage={metaData.page}
+              totalPage={metaData.totalPage}
+            />
+          </>
         )}
       </div>
     </section>
