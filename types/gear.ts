@@ -36,3 +36,31 @@ export type GearsResponse = {
   metaData: GearMetaData;
   data: Gear[];
 };
+
+export type GearReview = {
+  id: string;
+  customerId: string;
+  gearItemId: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type GearDetailsProvider = {
+  id: string;
+  name: string;
+  email: string;
+};
+
+export type GearDetails = Omit<Gear, "provider"> & {
+  provider: GearDetailsProvider;
+  reviews: GearReview[];
+};
+
+export type GearDetailsResponse = {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: GearDetails;
+};
