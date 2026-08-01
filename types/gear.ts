@@ -64,3 +64,27 @@ export type GearDetailsResponse = {
   message: string;
   data: GearDetails;
 };
+
+export type ProviderGearsResponse = {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: Gear[];
+};
+
+export type CreateGearInput = {
+  name: string;
+  description?: string;
+  imageUrl?: string;
+  brand: string;
+  pricePerDay: number;
+  stock: number;
+  categoryId: string;
+};
+
+export type CreateGearResponse = {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: Gear;
+};

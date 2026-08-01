@@ -1,10 +1,12 @@
+import { Providers } from "@/app/providers";
 import type { Metadata } from "next";
 import { Toaster } from "sonner";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "GearUp",
-  description: "Rent sports and outdoor gear from trusted providers.",
+  description:
+    "Rent sports and outdoor gear from trusted providers.",
 };
 
 export default function RootLayout({
@@ -15,7 +17,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        {children}
+        <Providers>{children}</Providers>
 
         <Toaster
           richColors
