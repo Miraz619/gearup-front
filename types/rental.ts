@@ -1,10 +1,10 @@
 export type RentalStatus =
   | "PLACED"
   | "CONFIRMED"
+  | "PAID"
   | "PICKED_UP"
   | "RETURNED"
   | "CANCELLED";
-
 export type RentalCustomer = {
   id: string;
   name: string;
@@ -58,4 +58,72 @@ export type ProviderOrdersResponse = {
   statusCode: number;
   message: string;
   data: ProviderRentalOrder[];
+};
+
+
+export type CreateRentalItemInput = {
+  gearItemId: string;
+  quantity: number;
+};
+
+export type CreateRentalInput = {
+  startDate: string;
+  endDate: string;
+  items: CreateRentalItemInput[];
+};
+
+export type CreateRentalResponse = {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: {
+    id: string;
+    customerId: string;
+    startDate: string;
+    endDate: string;
+    totalAmount: string;
+    status: RentalStatus;
+    createdAt: string;
+    updatedAt: string;
+    customer: RentalCustomer;
+    items: RentalOrderItem[];
+  };
+};
+
+export type PaymentStatus =
+  | "PENDING"
+  | "COMPLETED"
+  | "FAILED";
+
+export type RentalPayment = {
+  id: string;
+  rentalOrderId: string;
+  transactionId: string;
+  stripeSessionId: string;
+  amount: string;
+  method: string;
+  status: PaymentStatus;
+  paidAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CustomerRental = {
+  id: string;
+  customerId: string;
+  startDate: string;
+  endDate: string;
+  totalAmount: string;
+  status: RentalStatus;
+  createdAt: string;
+  updatedAt: string;
+  items: RentalOrderItem[];
+  payment: RentalPayment | null;
+};
+
+export type MyRentalsResponse = {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: CustomerRental[];
 };

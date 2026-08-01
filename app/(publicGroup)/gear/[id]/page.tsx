@@ -1,11 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { getSingleGear } from "@/service/getSingleGear";
 import {
@@ -38,10 +33,7 @@ export default async function GearDetailsPage({
   try {
     response = await getSingleGear(id);
   } catch (error) {
-    if (
-      error instanceof Error &&
-      error.message === "GEAR_NOT_FOUND"
-    ) {
+    if (error instanceof Error && error.message === "GEAR_NOT_FOUND") {
       notFound();
     }
 
@@ -53,20 +45,14 @@ export default async function GearDetailsPage({
 
   const averageRating =
     gear.reviews.length > 0
-      ? gear.reviews.reduce(
-          (total, review) => total + review.rating,
-          0,
-        ) / gear.reviews.length
+      ? gear.reviews.reduce((total, review) => total + review.rating, 0) /
+        gear.reviews.length
       : 0;
 
   return (
     <section className="min-h-[70vh] py-10 sm:py-14 lg:py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <Button
-          variant="ghost"
-          className="mb-6"
-          asChild
-        >
+        <Button variant="ghost" className="mb-6" asChild>
           <Link href="/gear">
             <ArrowLeft className="size-4" />
             Back to Gear
@@ -100,15 +86,9 @@ export default async function GearDetailsPage({
           {/* Gear information */}
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="secondary">
-                {gear.brand}
-              </Badge>
+              <Badge variant="secondary">{gear.brand}</Badge>
 
-              <Badge
-                variant={
-                  gear.isAvailable ? "default" : "secondary"
-                }
-              >
+              <Badge variant={gear.isAvailable ? "default" : "secondary"}>
                 {gear.isAvailable ? (
                   <>
                     <CheckCircle2 className="size-3.5" />
@@ -128,8 +108,7 @@ export default async function GearDetailsPage({
             </h1>
 
             <p className="mt-5 text-base leading-7 text-muted-foreground sm:text-lg">
-              {gear.description ||
-                "No description is available for this gear."}
+              {gear.description || "No description is available for this gear."}
             </p>
 
             <div className="mt-6 flex items-end gap-2">
@@ -137,9 +116,7 @@ export default async function GearDetailsPage({
                 ৳{price.toLocaleString()}
               </span>
 
-              <span className="pb-1 text-muted-foreground">
-                per day
-              </span>
+              <span className="pb-1 text-muted-foreground">per day</span>
             </div>
 
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
@@ -154,9 +131,7 @@ export default async function GearDetailsPage({
                       Available stock
                     </p>
 
-                    <p className="font-semibold">
-                      {gear.stock} items
-                    </p>
+                    <p className="font-semibold">{gear.stock} items</p>
                   </div>
                 </CardContent>
               </Card>
@@ -184,9 +159,7 @@ export default async function GearDetailsPage({
 
             <Card className="mt-6">
               <CardHeader>
-                <CardTitle className="text-lg">
-                  Provider information
-                </CardTitle>
+                <CardTitle className="text-lg">Provider information</CardTitle>
               </CardHeader>
 
               <CardContent className="space-y-3">
@@ -216,7 +189,9 @@ export default async function GearDetailsPage({
               asChild={gear.isAvailable && gear.stock > 0}
             >
               {gear.isAvailable && gear.stock > 0 ? (
-                <Link href={`/rentals/create?gearId=${gear.id}`}>
+                <Link
+                  href={`/customer-dashboard/rentals/create?gearId=${gear.id}`}
+                >
                   Rent This Gear
                 </Link>
               ) : (
@@ -231,9 +206,7 @@ export default async function GearDetailsPage({
         {/* Reviews */}
         <div>
           <div>
-            <Badge variant="secondary">
-              Customer Reviews
-            </Badge>
+            <Badge variant="secondary">Customer Reviews</Badge>
 
             <h2 className="mt-3 text-2xl font-bold tracking-tight sm:text-3xl">
               What renters say
@@ -245,9 +218,7 @@ export default async function GearDetailsPage({
               <CardContent className="py-10 text-center">
                 <Star className="mx-auto size-10 text-muted-foreground" />
 
-                <p className="mt-4 font-semibold">
-                  No reviews yet
-                </p>
+                <p className="mt-4 font-semibold">No reviews yet</p>
 
                 <p className="mt-2 text-sm text-muted-foreground">
                   This gear has not received any customer reviews.
@@ -261,23 +232,19 @@ export default async function GearDetailsPage({
                   <CardHeader>
                     <div className="flex items-center justify-between gap-4">
                       <div className="flex items-center gap-1">
-                        {Array.from({ length: 5 }).map(
-                          (_, index) => (
-                            <Star
-                              key={index}
-                              className={
-                                index < review.rating
-                                  ? "size-4 fill-current text-amber-500"
-                                  : "size-4 text-muted-foreground"
-                              }
-                            />
-                          ),
-                        )}
+                        {Array.from({ length: 5 }).map((_, index) => (
+                          <Star
+                            key={index}
+                            className={
+                              index < review.rating
+                                ? "size-4 fill-current text-amber-500"
+                                : "size-4 text-muted-foreground"
+                            }
+                          />
+                        ))}
                       </div>
 
-                      <Badge variant="outline">
-                        {review.rating}/5
-                      </Badge>
+                      <Badge variant="outline">{review.rating}/5</Badge>
                     </div>
                   </CardHeader>
 
@@ -287,9 +254,7 @@ export default async function GearDetailsPage({
                     </p>
 
                     <p className="mt-4 text-xs text-muted-foreground">
-                      {new Date(
-                        review.createdAt,
-                      ).toLocaleDateString()}
+                      {new Date(review.createdAt).toLocaleDateString()}
                     </p>
                   </CardContent>
                 </Card>
