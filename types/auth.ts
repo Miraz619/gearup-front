@@ -44,3 +44,10 @@ export type AuthActionResult = {
   message: string;
   user?: AuthUser;
 };
+
+export type GetMeResponse = {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: AuthUser;
+};
