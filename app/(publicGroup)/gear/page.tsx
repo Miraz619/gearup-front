@@ -1,4 +1,5 @@
 import { GearCard } from "@/app/(publicGroup)/_components/GearCard";
+import { GearFilters } from "@/app/(publicGroup)/_components/GearFilters";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -6,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { getCategories } from "@/service/getCategories";
 import { getGears } from "@/service/getGears";
 import { PackageSearch } from "lucide-react";
 
@@ -27,17 +29,20 @@ export default async function GearPage({
 }: GearPageProps) {
   const params = await searchParams;
 
-  const response = await getGears({
-    page: params.page || "1",
-    limit: "9",
-    searchTerm: params.searchTerm,
-    category: params.category,
-    brand: params.brand,
-    minPrice: params.minPrice,
-    maxPrice: params.maxPrice,
-    sortBy: params.sortBy,
-    sortOrder: params.sortOrder,
-  });
+  const [response, categoryResponse] = await Promise.all([
+    getGears({
+      page: params.page || "1",
+      limit: "9",
+      searchTerm: params.searchTerm,
+      category: params.category,
+      brand: params.brand,
+      minPrice: params.minPrice,
+      maxPrice: params.maxPrice,
+      sortBy: params.sortBy,
+      sortOrder: params.sortOrder,
+    }),
+    getCategories(),
+  ]);
 
   const gears = response.data;
   const metaData = response.metaData;
@@ -45,7 +50,6 @@ export default async function GearPage({
   return (
     <section className="min-h-[70vh] py-14 sm:py-16 lg:py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Page heading */}
         <div className="mx-auto max-w-2xl text-center">
           <Badge variant="secondary">Browse Gear</Badge>
 
@@ -59,12 +63,11 @@ export default async function GearPage({
           </p>
         </div>
 
-        {/* Result information */}
+        <GearFilters categories={categoryResponse.data} />
+
         <div className="mt-10 flex items-center justify-between border-b pb-4">
           <div>
-            <h2 className="font-semibold">
-              Available Gear
-            </h2>
+            <h2 className="font-semibold">Available Gear</h2>
 
             <p className="mt-1 text-sm text-muted-foreground">
               {metaData.total}{" "}
@@ -77,7 +80,6 @@ export default async function GearPage({
           </Badge>
         </div>
 
-        {/* Empty state */}
         {gears.length === 0 ? (
           <Card className="mx-auto mt-12 max-w-xl text-center">
             <CardHeader>
@@ -96,10 +98,7 @@ export default async function GearPage({
         ) : (
           <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {gears.map((gear) => (
-              <GearCard
-                key={gear.id}
-                gear={gear}
-              />
+              <GearCard key={gear.id} gear={gear} />
             ))}
           </div>
         )}
