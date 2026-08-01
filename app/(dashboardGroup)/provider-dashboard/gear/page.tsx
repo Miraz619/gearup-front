@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { DeleteGearButton } from "./_components/DeleteGearButton";
 import {
   Card,
   CardContent,
@@ -23,7 +24,7 @@ export default async function ProviderGearPage() {
 
   return (
     <div className="space-y-6">
-      {/* Page heading */}
+      
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
@@ -44,7 +45,7 @@ export default async function ProviderGearPage() {
         </Button>
       </div>
 
-      {/* Gear summary */}
+     
       <Card>
         <CardHeader className="flex flex-row items-center gap-4">
           <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -61,7 +62,7 @@ export default async function ProviderGearPage() {
         </CardHeader>
       </Card>
 
-      {/* Empty state */}
+  
       {gears.length === 0 ? (
         <Card>
           <CardContent className="flex min-h-80 flex-col items-center justify-center px-6 py-12 text-center">
@@ -93,7 +94,7 @@ export default async function ProviderGearPage() {
               key={gear.id}
               className="group overflow-hidden pt-0 transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg"
             >
-              {/* Gear image */}
+             
               <div className="relative aspect-[16/10] overflow-hidden bg-muted">
                 {gear.imageUrl ? (
                   <Image
@@ -159,23 +160,28 @@ export default async function ProviderGearPage() {
                   </Badge>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2">
-                  <Button variant="outline" asChild>
-                    <Link href={`/gear/${gear.id}`}>
-                      <Eye className="size-4" />
-                      View
-                    </Link>
-                  </Button>
+               <div className="grid gap-2 sm:grid-cols-3">
+  <Button variant="outline" asChild>
+    <Link href={`/gear/${gear.id}`}>
+      <Eye className="size-4" />
+      View
+    </Link>
+  </Button>
 
-                  <Button asChild>
-                    <Link
-                      href={`/provider-dashboard/gear/${gear.id}/edit`}
-                    >
-                      <Pencil className="size-4" />
-                      Edit
-                    </Link>
-                  </Button>
-                </div>
+  <Button asChild>
+    <Link
+      href={`/provider-dashboard/gear/${gear.id}/edit`}
+    >
+      <Pencil className="size-4" />
+      Edit
+    </Link>
+  </Button>
+
+  <DeleteGearButton
+    gearId={gear.id}
+    gearName={gear.name}
+  />
+</div>
               </CardContent>
             </Card>
           ))}

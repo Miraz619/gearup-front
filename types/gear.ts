@@ -88,3 +88,20 @@ export type CreateGearResponse = {
   message: string;
   data: Gear;
 };
+
+export type UpdateGearInput = {
+  name?: string;
+  description?: string;
+  imageUrl?: string;
+  brand?: string;
+  pricePerDay?: number;
+  stock?: number;
+  categoryId?: string;
+};
+
+export type UpdateGearResponse = {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: Gear;
+};
