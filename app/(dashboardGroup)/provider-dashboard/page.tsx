@@ -1,5 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { getProviderGears } from "@/service/getProviderGears";
+import { getProviderOrders } from "@/service/getProviderOrders";
 import {
   Card,
   CardContent,
@@ -52,21 +54,59 @@ const quickActions = [
 ];
 
 export default async function ProviderDashboardPage() {
-  const result = await getMe();
+const [userResult, gearResult, orderResult] =
+  await Promise.all([
+    getMe(),
+    getProviderGears(),
+    getProviderOrders(),
+  ]);
 
-  if (
-    !result.success ||
-    !result.data ||
-    result.data.role !== "PROVIDER"
-  ) {
-    redirect("/login");
-  }
+ if (
+  !userResult.success ||
+  !userResult.data ||
+  userResult.data.role !== "PROVIDER"
+) {
+  redirect("/login");
+}
 
-  const user = result.data;
+const user = userResult.data;
+const gears = gearResult.data;
+const orders = orderResult.data;
+const totalGear = gears.length;
+
+const availableGear = gears.filter(
+  (gear) =>
+    gear.isAvailable && gear.stock > 0,
+).length;
+
+const activeOrders = orders.filter((order) =>
+  [
+    "PLACED",
+    "CONFIRMED",
+    "PAID",
+    "PICKED_UP",
+  ].includes(order.status),
+).length;
+
+const completedOrders = orders.filter(
+  (order) => order.status === "RETURNED",
+).length;
+
+const totalEarnings = orders
+  .filter((order) =>
+    ["PAID", "PICKED_UP", "RETURNED"].includes(
+      order.status,
+    ),
+  )
+  .reduce(
+    (total, order) =>
+      total + Number(order.totalAmount),
+    0,
+  );
 
   return (
     <div className="space-y-6">
-      {/* Welcome section */}
+    
       <Card className="overflow-hidden border-primary/15 bg-gradient-to-br from-primary/10 via-card to-card">
         <CardContent className="p-6 sm:p-8">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
@@ -205,32 +245,216 @@ export default async function ProviderDashboardPage() {
       </section>
 
       {/* Real API section placeholder */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Provider overview</CardTitle>
+    <section>
+  <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <h2 className="text-xl font-semibold tracking-tight">
+        Provider overview
+      </h2>
 
-          <CardDescription>
-            Your real gear count, active orders, completed
-            rentals, and earnings will appear here after we
-            connect the provider APIs.
-          </CardDescription>
-        </CardHeader>
+      <p className="mt-1 text-sm text-muted-foreground">
+        Live information from your gear listings and rental orders.
+      </p>
+    </div>
 
-        <CardContent>
-          <div className="rounded-xl border border-dashed bg-muted/30 px-5 py-10 text-center">
-            <Boxes className="mx-auto size-10 text-muted-foreground" />
+    <Button variant="outline" asChild>
+      <Link href="/provider-dashboard/orders">
+        View All Orders
+        <ArrowRight className="size-4" />
+      </Link>
+    </Button>
+  </div>
 
-            <p className="mt-4 font-medium">
-              Provider data is not connected yet
-            </p>
+  <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+    <Card className="border-blue-200 bg-gradient-to-br from-blue-100 to-cyan-50 shadow-sm dark:border-blue-900 dark:from-blue-950/40 dark:to-cyan-950/20">
+      <CardContent className="flex items-center gap-4 p-5">
+        <div className="flex size-12 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-md">
+          <Boxes className="size-5" />
+        </div>
 
-            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted-foreground">
-              We will replace this area with real API data instead
-              of displaying fake dashboard statistics.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+        <div>
+          <p className="text-sm font-medium text-blue-800 dark:text-blue-300">
+            Total gear
+          </p>
+
+          <p className="mt-1 text-3xl font-bold">
+            {totalGear}
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+
+    <Card className="border-emerald-200 bg-gradient-to-br from-emerald-100 to-green-50 shadow-sm dark:border-emerald-900 dark:from-emerald-950/40 dark:to-green-950/20">
+      <CardContent className="flex items-center gap-4 p-5">
+        <div className="flex size-12 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-md">
+          <Store className="size-5" />
+        </div>
+
+        <div>
+          <p className="text-sm font-medium text-emerald-800 dark:text-emerald-300">
+            Available gear
+          </p>
+
+          <p className="mt-1 text-3xl font-bold">
+            {availableGear}
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+
+    <Card className="border-amber-200 bg-gradient-to-br from-amber-100 to-orange-50 shadow-sm dark:border-amber-900 dark:from-amber-950/40 dark:to-orange-950/20">
+      <CardContent className="flex items-center gap-4 p-5">
+        <div className="flex size-12 items-center justify-center rounded-2xl bg-amber-500 text-white shadow-md">
+          <ClipboardList className="size-5" />
+        </div>
+
+        <div>
+          <p className="text-sm font-medium text-amber-800 dark:text-amber-300">
+            Active orders
+          </p>
+
+          <p className="mt-1 text-3xl font-bold">
+            {activeOrders}
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+
+    <Card className="border-violet-200 bg-gradient-to-br from-violet-100 to-fuchsia-50 shadow-sm dark:border-violet-900 dark:from-violet-950/40 dark:to-fuchsia-950/20">
+      <CardContent className="flex items-center gap-4 p-5">
+        <div className="flex size-12 items-center justify-center rounded-2xl bg-violet-600 text-white shadow-md">
+          <ShieldCheck className="size-5" />
+        </div>
+
+        <div>
+          <p className="text-sm font-medium text-violet-800 dark:text-violet-300">
+            Completed
+          </p>
+
+          <p className="mt-1 text-3xl font-bold">
+            {completedOrders}
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+
+    <Card className="border-teal-200 bg-gradient-to-br from-teal-100 to-cyan-50 shadow-sm dark:border-teal-900 dark:from-teal-950/40 dark:to-cyan-950/20 sm:col-span-2 xl:col-span-1">
+      <CardContent className="flex items-center gap-4 p-5">
+        <div className="flex size-12 items-center justify-center rounded-2xl bg-teal-600 text-white shadow-md">
+          <BadgeDollarSign className="size-5" />
+        </div>
+
+        <div className="min-w-0">
+          <p className="text-sm font-medium text-teal-800 dark:text-teal-300">
+            Total earnings
+          </p>
+
+          <p className="mt-1 truncate text-3xl font-bold">
+            ৳
+            {totalEarnings.toLocaleString("en-BD", {
+              maximumFractionDigits: 2,
+            })}
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+  </div>
+</section>
+<section>
+  <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <h2 className="text-xl font-semibold tracking-tight">
+        Recent rental orders
+      </h2>
+
+      <p className="mt-1 text-sm text-muted-foreground">
+        Your three most recent customer rental orders.
+      </p>
+    </div>
+
+    <Button variant="outline" asChild>
+      <Link href="/provider-dashboard/orders">
+        View All Orders
+        <ArrowRight className="size-4" />
+      </Link>
+    </Button>
+  </div>
+
+  {orders.length === 0 ? (
+    <Card className="mt-5 border-dashed">
+      <CardContent className="flex flex-col items-center justify-center px-6 py-12 text-center">
+        <ClipboardList className="size-10 text-muted-foreground" />
+
+        <h3 className="mt-4 font-semibold">
+          No rental orders yet
+        </h3>
+
+        <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">
+          Customer rental requests for your equipment will appear here.
+        </p>
+      </CardContent>
+    </Card>
+  ) : (
+    <div className="mt-5 grid gap-4">
+      {orders.slice(0, 3).map((order) => (
+        <Card
+          key={order.id}
+          className="border-primary/15 bg-gradient-to-r from-primary/5 via-card to-card transition-all hover:-translate-y-0.5 hover:shadow-md"
+        >
+          <CardContent className="flex flex-col gap-5 p-5 lg:flex-row lg:items-center lg:justify-between">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="font-semibold">
+                  Order #{order.id.slice(0, 8).toUpperCase()}
+                </p>
+
+                <Badge variant="secondary">
+                  {order.status.replaceAll("_", " ")}
+                </Badge>
+              </div>
+
+              <p className="mt-2 text-sm text-muted-foreground">
+                Customer: {order.customer.name}
+              </p>
+
+              <p className="mt-1 text-sm text-muted-foreground">
+                {order.items.length}{" "}
+                {order.items.length === 1 ? "item" : "items"} ·{" "}
+                {new Intl.DateTimeFormat("en-GB", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                }).format(new Date(order.startDate))}
+                {" — "}
+                {new Intl.DateTimeFormat("en-GB", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                }).format(new Date(order.endDate))}
+              </p>
+            </div>
+
+            <div className="flex items-center justify-between gap-4 lg:justify-end">
+              <p className="text-xl font-bold text-primary">
+                ৳
+                {Number(order.totalAmount).toLocaleString(
+                  "en-BD",
+                )}
+              </p>
+
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/provider-dashboard/orders">
+                  Manage
+                  <ArrowRight className="size-4" />
+                </Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  )}
+</section>
     </div>
   );
 }

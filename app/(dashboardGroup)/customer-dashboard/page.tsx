@@ -335,6 +335,104 @@ const totalPaid = rentals
     </Card>
   </div>
 </section>
+
+<section>
+  <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <h2 className="text-xl font-semibold tracking-tight">
+        Recent rentals
+      </h2>
+
+      <p className="mt-1 text-sm text-muted-foreground">
+        Your three most recent rental orders.
+      </p>
+    </div>
+
+    <Button variant="outline" asChild>
+      <Link href="/customer-dashboard/rentals">
+        View All
+        <ArrowRight className="size-4" />
+      </Link>
+    </Button>
+  </div>
+
+  {rentals.length === 0 ? (
+    <Card className="mt-5 border-dashed">
+      <CardContent className="flex flex-col items-center justify-center px-6 py-12 text-center">
+        <PackageSearch className="size-10 text-muted-foreground" />
+
+        <h3 className="mt-4 font-semibold">
+          No rentals yet
+        </h3>
+
+        <p className="mt-2 text-sm text-muted-foreground">
+          Browse available gear and create your first rental.
+        </p>
+
+        <Button className="mt-5" asChild>
+          <Link href="/gear">
+            Browse Gear
+          </Link>
+        </Button>
+      </CardContent>
+    </Card>
+  ) : (
+    <div className="mt-5 grid gap-4">
+      {rentals.slice(0, 3).map((rental) => (
+        <Card
+          key={rental.id}
+          className="border-primary/15 bg-gradient-to-r from-primary/5 via-card to-card"
+        >
+          <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="font-semibold">
+                  Rental #{rental.id.slice(0, 8).toUpperCase()}
+                </p>
+
+                <Badge variant="secondary">
+                  {rental.status.replaceAll("_", " ")}
+                </Badge>
+              </div>
+
+              <p className="mt-2 text-sm text-muted-foreground">
+                {rental.items.length}{" "}
+                {rental.items.length === 1 ? "item" : "items"} ·{" "}
+                {new Intl.DateTimeFormat("en-GB", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                }).format(new Date(rental.startDate))}
+                {" — "}
+                {new Intl.DateTimeFormat("en-GB", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                }).format(new Date(rental.endDate))}
+              </p>
+            </div>
+
+            <div className="flex items-center justify-between gap-4 sm:justify-end">
+              <p className="text-xl font-bold text-primary">
+                ৳
+                {Number(rental.totalAmount).toLocaleString(
+                  "en-BD",
+                )}
+              </p>
+
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/customer-dashboard/rentals">
+                  Details
+                  <ArrowRight className="size-4" />
+                </Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  )}
+</section>
     </div>
   );
 }
