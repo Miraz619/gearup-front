@@ -250,9 +250,9 @@ export default async function GearDetailsPage({
                 className="mt-6 w-full"
                 asChild
               >
-                <Link href={`/gear/${id}/rent`}>
-                  Rent This Gear
-                </Link>
+                <Link href={`/customer-dashboard/rentals/create?gearId=${id}`}>
+  Rent This Gear
+</Link>
               </Button>
             ) : (
               <Button
