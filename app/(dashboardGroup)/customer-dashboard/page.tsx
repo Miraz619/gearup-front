@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { getMyRentals } from "@/service/getMyRentals";
 import {
   Card,
   CardContent,
@@ -52,21 +53,53 @@ const quickActions = [
 ];
 
 export default async function CustomerDashboardPage() {
-  const result = await getMe();
 
-  if (
-    !result.success ||
-    !result.data ||
-    result.data.role !== "CUSTOMER"
-  ) {
-    redirect("/login");
-  }
+  const [userResult, rentalResult] = await Promise.all([
+  getMe(),
+  getMyRentals(),
+]);
 
-  const user = result.data;
+if (
+  !userResult.success ||
+  !userResult.data ||
+  userResult.data.role !== "CUSTOMER"
+) {
+  redirect("/login");
+}
+
+const user = userResult.data;
+const rentals = rentalResult.data;
+  
+const activeRentals = rentals.filter((rental) =>
+  ["PLACED", "CONFIRMED", "PAID", "PICKED_UP"].includes(
+    rental.status,
+  ),
+).length;
+
+const completedRentals = rentals.filter(
+  (rental) => rental.status === "RETURNED",
+).length;
+
+const pendingPayments = rentals.filter(
+  (rental) =>
+    rental.status === "CONFIRMED" &&
+    rental.payment?.status !== "COMPLETED",
+).length;
+
+const totalPaid = rentals
+  .filter(
+    (rental) =>
+      rental.payment?.status === "COMPLETED",
+  )
+  .reduce(
+    (total, rental) =>
+      total + Number(rental.payment?.amount ?? 0),
+    0,
+  );
 
   return (
     <div className="space-y-6">
-      {/* Welcome section */}
+     
       <Card className="overflow-hidden border-primary/15 bg-gradient-to-br from-primary/10 via-card to-card">
         <CardContent className="p-6 sm:p-8">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
@@ -100,7 +133,7 @@ export default async function CustomerDashboardPage() {
         </CardContent>
       </Card>
 
-      {/* Account information */}
+    
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center gap-4">
@@ -151,7 +184,7 @@ export default async function CustomerDashboardPage() {
         </Card>
       </div>
 
-      {/* Quick actions */}
+    
       <section>
         <div>
           <h2 className="text-xl font-semibold tracking-tight">
@@ -204,33 +237,104 @@ export default async function CustomerDashboardPage() {
         </div>
       </section>
 
-      {/* Rental summary placeholder */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Rental overview</CardTitle>
+   
+     <section>
+  <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <h2 className="text-xl font-semibold tracking-tight">
+        Rental overview
+      </h2>
 
-          <CardDescription>
-            Your active, completed, and pending rental
-            information will appear here after we connect the
-            customer rental-history endpoint.
-          </CardDescription>
-        </CardHeader>
+      <p className="mt-1 text-sm text-muted-foreground">
+        Live information from your rental and payment history.
+      </p>
+    </div>
 
-        <CardContent>
-          <div className="rounded-xl border border-dashed bg-muted/30 px-5 py-10 text-center">
-            <CalendarDays className="mx-auto size-10 text-muted-foreground" />
+    <Button variant="outline" asChild>
+      <Link href="/customer-dashboard/rentals">
+        View All Rentals
+        <ArrowRight className="size-4" />
+      </Link>
+    </Button>
+  </div>
 
-            <p className="mt-4 font-medium">
-              Rental data is not connected yet
-            </p>
+  <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <Card className="border-blue-200 bg-gradient-to-br from-blue-100 to-cyan-50 shadow-sm dark:border-blue-900 dark:from-blue-950/40 dark:to-cyan-950/20">
+      <CardContent className="flex items-center gap-4 p-5">
+        <div className="flex size-12 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-md">
+          <CalendarDays className="size-5" />
+        </div>
 
-            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted-foreground">
-              We will replace this state with real API data rather
-              than displaying invented statistics.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+        <div>
+          <p className="text-sm font-medium text-blue-800 dark:text-blue-300">
+            Active rentals
+          </p>
+
+          <p className="mt-1 text-3xl font-bold">
+            {activeRentals}
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+
+    <Card className="border-emerald-200 bg-gradient-to-br from-emerald-100 to-green-50 shadow-sm dark:border-emerald-900 dark:from-emerald-950/40 dark:to-green-950/20">
+      <CardContent className="flex items-center gap-4 p-5">
+        <div className="flex size-12 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-md">
+          <PackageSearch className="size-5" />
+        </div>
+
+        <div>
+          <p className="text-sm font-medium text-emerald-800 dark:text-emerald-300">
+            Completed rentals
+          </p>
+
+          <p className="mt-1 text-3xl font-bold">
+            {completedRentals}
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+
+    <Card className="border-amber-200 bg-gradient-to-br from-amber-100 to-orange-50 shadow-sm dark:border-amber-900 dark:from-amber-950/40 dark:to-orange-950/20">
+      <CardContent className="flex items-center gap-4 p-5">
+        <div className="flex size-12 items-center justify-center rounded-2xl bg-amber-500 text-white shadow-md">
+          <CreditCard className="size-5" />
+        </div>
+
+        <div>
+          <p className="text-sm font-medium text-amber-800 dark:text-amber-300">
+            Pending payments
+          </p>
+
+          <p className="mt-1 text-3xl font-bold">
+            {pendingPayments}
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+
+    <Card className="border-violet-200 bg-gradient-to-br from-violet-100 to-fuchsia-50 shadow-sm dark:border-violet-900 dark:from-violet-950/40 dark:to-fuchsia-950/20">
+      <CardContent className="flex items-center gap-4 p-5">
+        <div className="flex size-12 items-center justify-center rounded-2xl bg-violet-600 text-white shadow-md">
+          <CreditCard className="size-5" />
+        </div>
+
+        <div className="min-w-0">
+          <p className="text-sm font-medium text-violet-800 dark:text-violet-300">
+            Total paid
+          </p>
+
+          <p className="mt-1 truncate text-3xl font-bold">
+            ৳
+            {totalPaid.toLocaleString("en-BD", {
+              maximumFractionDigits: 2,
+            })}
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+  </div>
+</section>
     </div>
   );
 }
