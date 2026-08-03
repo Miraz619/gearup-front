@@ -9,6 +9,7 @@ import {
   Settings,
   ShieldCheck,
   Star,
+  Tags,
   Users,
 } from "lucide-react";
 
@@ -94,6 +95,11 @@ export const adminNavItems: DashboardNavItem[] = [
     title: "Gear Management",
     href: "/admin-dashboard/gear",
     icon: Boxes,
+  },
+  {
+    title: "Categories",
+    href: "/admin-dashboard/categories",
+    icon: Tags,
   },
   {
     title: "Rental Orders",

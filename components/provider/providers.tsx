@@ -14,7 +14,7 @@ export function Providers({
   const [queryClient] = useState(
     () =>
       new QueryClient({
-        defaultOptions: {
+        defaultOptions: { 
           queries: {
             staleTime: 60 * 1000,
             refetchOnWindowFocus: false,
