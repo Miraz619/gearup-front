@@ -12,7 +12,22 @@ type AdminUser = {
 type AdminGear = {
   id: string;
   name: string;
+  description?: string;
+  imageUrl?: string;
+  brand: string;
+  pricePerDay: string | number;
+  stock: number;
   isAvailable: boolean;
+  createdAt: string;
+  provider: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  category: {
+    id: string;
+    name: string;
+  };
 };
 
 type AdminRental = {
