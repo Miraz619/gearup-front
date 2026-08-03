@@ -1,36 +1,126 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# GearUp Frontend
+
+GearUp is a modern, role-based equipment rental marketplace frontend built with Next.js and TypeScript. The application allows customers to browse and rent outdoor and sports equipment, enables providers to manage their inventory and orders, and gives administrators oversight of platform operations.
+
+## Overview
+
+This frontend connects to a backend API to power:
+
+- Public browsing of gear catalog with filtering and pagination
+- Detailed gear views and category-based discovery
+- User authentication and role-based dashboards
+- Provider tools for creating, updating, and managing gear
+- Customer rental requests, payments, and review submission
+- Admin management of users, categories, and platform data
+
+## Tech Stack
+
+- Next.js 16
+- React 19
+- TypeScript
+- Tailwind CSS
+- shadcn/ui component system
+- React Hook Form + Zod
+- TanStack Query
+- Recharts
+- Sonner for notifications
+
+## Project Structure
+
+```text
+app/                 # App Router pages, layouts, and route groups
+components/          # Shared and feature-based UI components
+service/             # API service functions for backend communication
+types/               # TypeScript models for auth, gear, rentals, payments, reviews
+lib/                 # Utility helpers
+public/              # Static assets
+```
+
+## Features
+
+### For Customers
+
+- Browse gear by category and filters
+- View full gear details
+- Create rental requests
+- Complete payments through Stripe Checkout
+- Track rentals and submit reviews
+
+### For Providers
+
+- Manage equipment listings
+- Create and update gear entries
+- View provider orders and earnings
+- Monitor rental activity and fulfillment status
+
+### For Admins
+
+- Manage users and account status
+- Manage categories
+- Review platform-level dashboard analytics
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 20+
+- pnpm
+
+### Installation
+
+1. Clone the repository
+2. Install dependencies:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+3. Create an environment file:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+cp .env.local.example .env.local
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Configure your backend URL:
 
-## Learn More
+```env
+BACKEND_API_URL=http://localhost:5000
+```
 
-To learn more about Next.js, take a look at the following resources:
+### Development
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Start the development server:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+pnpm dev
+```
 
-## Deploy on Vercel
+Open http://localhost:3000 in your browser.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Available Scripts
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+pnpm dev      # Start the Next.js development server
+pnpm build    # Create a production build
+pnpm start    # Start the production server
+pnpm lint     # Run ESLint checks
+```
+
+## Environment Variables
+
+The application expects the following environment variable:
+
+- BACKEND_API_URL: Base URL for the backend API used by the frontend services and server actions
+
+## Contributing
+
+Contributions are welcome. If you would like to improve the project:
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Open a pull request
+
+## License
+
+This project is currently unlicensed. Add an appropriate license if you plan to distribute or share it publicly.
