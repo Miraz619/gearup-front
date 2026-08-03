@@ -32,8 +32,39 @@ type AdminGear = {
 
 type AdminRental = {
   id: string;
-  status: string;
+  status:
+    | "PLACED"
+    | "CONFIRMED"
+    | "PAID"
+    | "PICKED_UP"
+    | "RETURNED"
+    | "CANCELLED";
+  startDate: string;
+  endDate: string;
   totalAmount: string | number;
+  createdAt: string;
+  customer: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  items: {
+    id: string;
+    quantity: number;
+    pricePerDay: string | number;
+    subtotal: string | number;
+    gearItem: {
+      id: string;
+      name: string;
+      brand: string;
+    };
+  }[];
+  payment?: {
+    id: string;
+    amount: string | number;
+    status: string;
+    method: string;
+  } | null;
 };
 
 type AdminUsersResponse = {

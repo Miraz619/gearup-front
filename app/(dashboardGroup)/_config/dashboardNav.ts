@@ -96,18 +96,8 @@ export const adminNavItems: DashboardNavItem[] = [
     icon: Boxes,
   },
   {
-    title: "Rentals",
+    title: "Rental Orders",
     href: "/admin-dashboard/rentals",
     icon: ClipboardList,
-  },
-  {
-    title: "Payments",
-    href: "/admin-dashboard/payments",
-    icon: CreditCard,
-  },
-  {
-    title: "Administration",
-    href: "/admin-dashboard/settings",
-    icon: ShieldCheck,
   },
 ];
