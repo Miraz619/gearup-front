@@ -72,10 +72,7 @@ export async function proxy(request: NextRequest) {
 
   let newAccessToken: string | null = null;
 
-  /*
-   * Access token expired or invalid,
-   * but refresh token is still valid.
-   */
+ 
   if (
     !decodedAccessToken?.success &&
     decodedRefreshToken?.success &&
@@ -157,10 +154,7 @@ export async function proxy(request: NextRequest) {
     isRentalRoute ||
     isProtectedPaymentRoute;
 
-  /*
-   * Logged-in users should not open
-   * login or registration pages again.
-   */
+ 
   if (isAuthRoute && isAuthenticated && userRole) {
     const redirectResponse =
       NextResponse.redirect(
@@ -180,9 +174,7 @@ export async function proxy(request: NextRequest) {
     return redirectResponse;
   }
 
-  /*
-   * Guests cannot access protected routes.
-   */
+  
   if (isProtectedRoute && !isAuthenticated) {
     const loginUrl = new URL(
       "/login",
@@ -205,9 +197,7 @@ export async function proxy(request: NextRequest) {
     return redirectResponse;
   }
 
-  /*
-   * Role-based dashboard authorization.
-   */
+  
   if (
     isCustomerRoute &&
     userRole !== "CUSTOMER"
@@ -241,9 +231,7 @@ export async function proxy(request: NextRequest) {
     );
   }
 
-  /*
-   * Continue to the requested page.
-   */
+  
   const response = NextResponse.next();
 
   if (newAccessToken) {
