@@ -4,7 +4,7 @@ export const getCategories = async (): Promise<CategoriesResponse> => {
   const response = await fetch(
     `${process.env.BACKEND_API_URL}/api/categories`,
     {
-      cache: "no-store",
+      next: { revalidate: 300 },
     }
   );
 

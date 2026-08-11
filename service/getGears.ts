@@ -36,7 +36,7 @@ export const getGears = async (
     : `${backendUrl}/api/gear`;
 
   const response = await fetch(url, {
-    cache: "no-store",
+    next: { revalidate: 60 },
   });
 
   const result: GearsResponse = await response.json();
