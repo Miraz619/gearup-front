@@ -1,109 +1,338 @@
+
+
+// import { AdminDashboardCharts } from "@/app/(dashboardGroup)/_components/AdminDashboardCharts";
 // import { Badge } from "@/components/ui/badge";
 // import {
 //   Card,
 //   CardContent,
-//   CardHeader,
-//   CardTitle,
 // } from "@/components/ui/card";
 // import { getAdminDashboardData } from "@/service/getAdminDashboardData";
 // import {
 //   Boxes,
+//   CheckCircle2,
 //   ClipboardList,
+//   DollarSign,
 //   ShieldCheck,
+//   UserCheck,
 //   Users,
 // } from "lucide-react";
+
+// function formatCurrency(value: number) {
+//   return value.toLocaleString("en-BD");
+// }
 
 // export default async function AdminDashboardPage() {
 //   const { users, gear, rentals } =
 //     await getAdminDashboardData();
+//     const userRoleData = [
+//   {
+//     name: "Customers",
+//     value: users.filter(
+//       (user) => user.role === "CUSTOMER",
+//     ).length,
+//   },
+//   {
+//     name: "Providers",
+//     value: users.filter(
+//       (user) => user.role === "PROVIDER",
+//     ).length,
+//   },
+//   {
+//     name: "Admins",
+//     value: users.filter(
+//       (user) => user.role === "ADMIN",
+//     ).length,
+//   },
+// ];
+//   const activeUsers = users.filter(
+//     (user) => user.isActive,
+//   ).length;
+
+//   const availableGear = gear.filter(
+//     (item) =>
+//       item.isAvailable &&
+//       item.stock > 0,
+//   ).length;
+
+//   const completedRentals = rentals.filter(
+//     (rental) =>
+//       rental.status === "RETURNED",
+//   ).length;
+
+//   const revenue = rentals
+//     .filter(
+//       (rental) =>
+//         rental.payment?.status ===
+//         "COMPLETED",
+//     )
+//     .reduce(
+//       (total, rental) =>
+//         total +
+//         Number(
+//           rental.payment?.amount || 0,
+//         ),
+//       0,
+//     );
 
 //   const stats = [
 //     {
 //       title: "Total Users",
-//       value: users.length.toString(),
-//       description: "Registered customers, providers, and admins",
+//       value: users.length,
+//       description:
+//         "Customers, providers and admins",
 //       icon: Users,
 //     },
 //     {
+//       title: "Active Users",
+//       value: activeUsers,
+//       description:
+//         "Currently active accounts",
+//       icon: UserCheck,
+//     },
+//     {
 //       title: "Total Gear",
-//       value: gear.length.toString(),
-//       description: "Equipment listed across the platform",
+//       value: gear.length,
+//       description:
+//         "Listed equipment items",
 //       icon: Boxes,
 //     },
 //     {
+//       title: "Available Gear",
+//       value: availableGear,
+//       description:
+//         "Ready for rental",
+//       icon: CheckCircle2,
+//     },
+//     {
 //       title: "Total Rentals",
-//       value: rentals.length.toString(),
-//       description: "Rental orders across the platform",
+//       value: rentals.length,
+//       description:
+//         "All rental orders",
 //       icon: ClipboardList,
+//     },
+//     {
+//       title: "Revenue",
+//       value: `৳${formatCurrency(revenue)}`,
+//       description:
+//         "Completed payments",
+//       icon: DollarSign,
 //     },
 //   ];
 
 //   return (
 //     <div className="space-y-8">
-//       <section className="relative overflow-hidden rounded-3xl border border-primary/15 bg-gradient-to-br from-violet-100 via-blue-50 to-emerald-100 px-6 py-8 shadow-sm dark:from-violet-950/30 dark:via-blue-950/20 dark:to-emerald-950/30 sm:px-8">
-//         <div className="absolute -right-16 -top-20 size-56 rounded-full bg-primary/10 blur-3xl" />
-//         <div className="absolute -bottom-20 left-1/3 size-48 rounded-full bg-emerald-400/10 blur-3xl" />
 
-//         <div className="relative">
-//           <Badge className="bg-primary text-primary-foreground">
-//             <ShieldCheck className="size-3.5" />
-//             Admin Control Center
-//           </Badge>
+//       <section className="rounded-3xl border bg-card px-6 py-8 shadow-sm sm:px-8">
+//         <Badge variant="secondary">
+//           <ShieldCheck className="size-3.5" />
+//           Admin Control Center
+//         </Badge>
 
-//           <h1 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
-//             Admin Dashboard
-//           </h1>
+//         <h1 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
+//           Admin Dashboard
+//         </h1>
 
-//           <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
-//             Monitor users, equipment listings, rental activity, and platform
-//             operations from one dashboard.
-//           </p>
-//         </div>
+//         <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
+//           Monitor users, equipment,
+//           rental activities and overall
+//           platform performance.
+//         </p>
 //       </section>
 
+
 //       <section className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+
 //         {stats.map((item) => {
+
 //           const Icon = item.icon;
 
 //           return (
 //             <Card
 //               key={item.title}
-//               className="overflow-hidden border-primary/15 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+//               className="border-border/70 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
 //             >
-//               <CardHeader className="flex flex-row items-center justify-between space-y-0">
-//                 <CardTitle className="text-base font-semibold">
-//                   {item.title}
-//                 </CardTitle>
 
-//                 <div className="flex size-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-//                   <Icon className="size-5" />
+//               <CardContent className="flex items-center gap-5 p-6">
+
+//                 <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+//                   <Icon className="size-6"/>
 //                 </div>
-//               </CardHeader>
 
-//               <CardContent>
-//                 <p className="text-3xl font-bold">
-//                   {item.value}
-//                 </p>
 
-//                 <p className="mt-2 text-sm text-muted-foreground">
-//                   {item.description}
-//                 </p>
+//                 <div>
+//                   <p className="text-sm text-muted-foreground">
+//                     {item.title}
+//                   </p>
+
+//                   <p className="mt-1 text-3xl font-bold">
+//                     {item.value}
+//                   </p>
+
+//                   <p className="mt-1 text-xs text-muted-foreground">
+//                     {item.description}
+//                   </p>
+//                 </div>
+
 //               </CardContent>
+
 //             </Card>
 //           );
+
 //         })}
+
 //       </section>
+
+
+//       <section className="grid gap-5 lg:grid-cols-2">
+
+//         <Card>
+//           <CardContent className="p-6">
+
+//             <h2 className="font-semibold">
+//               Platform Summary
+//             </h2>
+
+//             <div className="mt-5 space-y-4 text-sm">
+
+//               <div className="flex justify-between">
+//                 <span className="text-muted-foreground">
+//                   Providers
+//                 </span>
+
+//                 <span className="font-semibold">
+//                   {
+//                     users.filter(
+//                       (u)=>
+//                       u.role==="PROVIDER"
+//                     ).length
+//                   }
+//                 </span>
+//               </div>
+
+
+//               <div className="flex justify-between">
+//                 <span className="text-muted-foreground">
+//                   Customers
+//                 </span>
+
+//                 <span className="font-semibold">
+//                   {
+//                     users.filter(
+//                       (u)=>
+//                       u.role==="CUSTOMER"
+//                     ).length
+//                   }
+//                 </span>
+//               </div>
+
+
+//               <div className="flex justify-between">
+//                 <span className="text-muted-foreground">
+//                   Returned Rentals
+//                 </span>
+
+//                 <span className="font-semibold">
+//                   {completedRentals}
+//                 </span>
+//               </div>
+
+//             </div>
+
+//           </CardContent>
+//         </Card>
+
+
+//         <Card>
+//           <CardContent className="p-6">
+
+//             <h2 className="font-semibold">
+//               Platform Health
+//             </h2>
+
+//             <div className="mt-5 space-y-4">
+
+//               <div>
+//                 <div className="flex justify-between text-sm">
+//                   <span>
+//                     Gear Availability
+//                   </span>
+
+//                   <span>
+//                     {availableGear}/{gear.length}
+//                   </span>
+//                 </div>
+
+//                 <div className="mt-2 h-2 rounded-full bg-muted">
+//                   <div
+//                     className="h-full rounded-full bg-primary"
+//                     style={{
+//                       width:`${
+//                         gear.length
+//                         ?
+//                         (availableGear /
+//                         gear.length)*100
+//                         :
+//                         0
+//                       }%`,
+//                     }}
+//                   />
+//                 </div>
+
+//               </div>
+
+
+//               <div>
+//                 <div className="flex justify-between text-sm">
+//                   <span>
+//                     Active Users
+//                   </span>
+
+//                   <span>
+//                     {activeUsers}/{users.length}
+//                   </span>
+//                 </div>
+
+//                 <div className="mt-2 h-2 rounded-full bg-muted">
+//                   <div
+//                     className="h-full rounded-full bg-primary"
+//                     style={{
+//                       width:`${
+//                         users.length
+//                         ?
+//                         (activeUsers /
+//                         users.length)*100
+//                         :
+//                         0
+//                       }%`,
+//                     }}
+//                   />
+//                 </div>
+
+//               </div>
+
+//             </div>
+
+//           </CardContent>
+//         </Card>
+
+//       </section>
+
 //     </div>
 //   );
-// }
 
+
+
+import { AdminDashboardCharts } from "@/app/(dashboardGroup)/_components/AdminDashboardCharts";
 
 import { Badge } from "@/components/ui/badge";
+
 import {
   Card,
   CardContent,
 } from "@/components/ui/card";
+
 import { getAdminDashboardData } from "@/service/getAdminDashboardData";
+
 import {
   Boxes,
   CheckCircle2,
@@ -114,43 +343,68 @@ import {
   Users,
 } from "lucide-react";
 
-function formatCurrency(value: number) {
-  return value.toLocaleString("en-BD");
+function formatCurrency(
+  value: number,
+) {
+  return value.toLocaleString(
+    "en-BD",
+  );
 }
 
 export default async function AdminDashboardPage() {
-  const { users, gear, rentals } =
+  const {
+    users,
+    gear,
+    rentals,
+  } =
     await getAdminDashboardData();
 
-  const activeUsers = users.filter(
-    (user) => user.isActive,
-  ).length;
+  /*
+   * Dashboard statistics
+   */
 
-  const availableGear = gear.filter(
-    (item) =>
-      item.isAvailable &&
-      item.stock > 0,
-  ).length;
+  const activeUsers =
+    users.filter(
+      (user) => user.isActive,
+    ).length;
 
-  const completedRentals = rentals.filter(
-    (rental) =>
-      rental.status === "RETURNED",
-  ).length;
+  const availableGear =
+    gear.filter(
+      (item) =>
+        item.isAvailable &&
+        item.stock > 0,
+    ).length;
+
+  const completedRentals =
+    rentals.filter(
+      (rental) =>
+        rental.status ===
+        "RETURNED",
+    ).length;
 
   const revenue = rentals
     .filter(
       (rental) =>
-        rental.payment?.status ===
+        rental.payment
+          ?.status ===
         "COMPLETED",
     )
     .reduce(
-      (total, rental) =>
+      (
+        total,
+        rental,
+      ) =>
         total +
         Number(
-          rental.payment?.amount || 0,
+          rental.payment
+            ?.amount || 0,
         ),
       0,
     );
+
+  /*
+   * Overview cards
+   */
 
   const stats = [
     {
@@ -160,6 +414,7 @@ export default async function AdminDashboardPage() {
         "Customers, providers and admins",
       icon: Users,
     },
+
     {
       title: "Active Users",
       value: activeUsers,
@@ -167,6 +422,7 @@ export default async function AdminDashboardPage() {
         "Currently active accounts",
       icon: UserCheck,
     },
+
     {
       title: "Total Gear",
       value: gear.length,
@@ -174,35 +430,133 @@ export default async function AdminDashboardPage() {
         "Listed equipment items",
       icon: Boxes,
     },
+
     {
-      title: "Available Gear",
+      title:
+        "Available Gear",
       value: availableGear,
       description:
         "Ready for rental",
       icon: CheckCircle2,
     },
+
     {
-      title: "Total Rentals",
+      title:
+        "Total Rentals",
       value: rentals.length,
       description:
         "All rental orders",
       icon: ClipboardList,
     },
+
     {
       title: "Revenue",
-      value: `৳${formatCurrency(revenue)}`,
+      value: `৳${formatCurrency(
+        revenue,
+      )}`,
       description:
         "Completed payments",
       icon: DollarSign,
     },
   ];
 
+  /*
+   * Dynamic user chart
+   */
+
+  const userRoleData = [
+    {
+      name: "Customers",
+
+      value:
+        users.filter(
+          (user) =>
+            user.role ===
+            "CUSTOMER",
+        ).length,
+    },
+
+    {
+      name: "Providers",
+
+      value:
+        users.filter(
+          (user) =>
+            user.role ===
+            "PROVIDER",
+        ).length,
+    },
+
+    {
+      name: "Admins",
+
+      value:
+        users.filter(
+          (user) =>
+            user.role ===
+            "ADMIN",
+        ).length,
+    },
+  ];
+
+  /*
+   * Dynamic rental chart
+   */
+
+  const rentalStatusMap =
+    rentals.reduce<
+      Record<
+        string,
+        number
+      >
+    >(
+      (
+        accumulator,
+        rental,
+      ) => {
+        const status =
+          rental.status;
+
+        accumulator[
+          status
+        ] =
+          (accumulator[
+            status
+          ] ?? 0) + 1;
+
+        return accumulator;
+      },
+      {},
+    );
+
+  const rentalStatusData =
+    Object.entries(
+      rentalStatusMap,
+    ).map(
+      ([status, value]) => ({
+        name: status
+          .replace(
+            /_/g,
+            " ",
+          )
+          .toLowerCase()
+          .replace(
+            /\b\w/g,
+            (letter) =>
+              letter.toUpperCase(),
+          ),
+
+        value,
+      }),
+    );
+
   return (
     <div className="space-y-8">
-
+      {/* Heading */}
       <section className="rounded-3xl border bg-card px-6 py-8 shadow-sm sm:px-8">
         <Badge variant="secondary">
           <ShieldCheck className="size-3.5" />
+
           Admin Control Center
         </Badge>
 
@@ -211,67 +565,78 @@ export default async function AdminDashboardPage() {
         </h1>
 
         <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
-          Monitor users, equipment,
-          rental activities and overall
+          Monitor users,
+          equipment, rental
+          activities and overall
           platform performance.
         </p>
       </section>
 
-
+      {/* Overview cards */}
       <section className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+        {stats.map(
+          (item) => {
+            const Icon =
+              item.icon;
 
-        {stats.map((item) => {
+            return (
+              <Card
+                key={
+                  item.title
+                }
+                className="border-border/70 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
+              >
+                <CardContent className="flex items-center gap-5 p-6">
+                  <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                    <Icon className="size-6" />
+                  </div>
 
-          const Icon = item.icon;
+                  <div>
+                    <p className="text-sm text-muted-foreground">
+                      {
+                        item.title
+                      }
+                    </p>
 
-          return (
-            <Card
-              key={item.title}
-              className="border-border/70 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
-            >
+                    <p className="mt-1 text-3xl font-bold">
+                      {
+                        item.value
+                      }
+                    </p>
 
-              <CardContent className="flex items-center gap-5 p-6">
-
-                <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                  <Icon className="size-6"/>
-                </div>
-
-
-                <div>
-                  <p className="text-sm text-muted-foreground">
-                    {item.title}
-                  </p>
-
-                  <p className="mt-1 text-3xl font-bold">
-                    {item.value}
-                  </p>
-
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {item.description}
-                  </p>
-                </div>
-
-              </CardContent>
-
-            </Card>
-          );
-
-        })}
-
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {
+                        item.description
+                      }
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          },
+        )}
       </section>
 
+      {/* Real dynamic charts */}
+      <AdminDashboardCharts
+        userRoleData={
+          userRoleData
+        }
+        rentalStatusData={
+          rentalStatusData
+        }
+      />
 
+      {/* Platform information */}
       <section className="grid gap-5 lg:grid-cols-2">
-
+        {/* Platform summary */}
         <Card>
           <CardContent className="p-6">
-
             <h2 className="font-semibold">
               Platform Summary
             </h2>
 
             <div className="mt-5 space-y-4 text-sm">
-
               <div className="flex justify-between">
                 <span className="text-muted-foreground">
                   Providers
@@ -280,13 +645,15 @@ export default async function AdminDashboardPage() {
                 <span className="font-semibold">
                   {
                     users.filter(
-                      (u)=>
-                      u.role==="PROVIDER"
+                      (
+                        user,
+                      ) =>
+                        user.role ===
+                        "PROVIDER",
                     ).length
                   }
                 </span>
               </div>
-
 
               <div className="flex justify-between">
                 <span className="text-muted-foreground">
@@ -296,13 +663,15 @@ export default async function AdminDashboardPage() {
                 <span className="font-semibold">
                   {
                     users.filter(
-                      (u)=>
-                      u.role==="CUSTOMER"
+                      (
+                        user,
+                      ) =>
+                        user.role ===
+                        "CUSTOMER",
                     ).length
                   }
                 </span>
               </div>
-
 
               <div className="flex justify-between">
                 <span className="text-muted-foreground">
@@ -310,25 +679,24 @@ export default async function AdminDashboardPage() {
                 </span>
 
                 <span className="font-semibold">
-                  {completedRentals}
+                  {
+                    completedRentals
+                  }
                 </span>
               </div>
-
             </div>
-
           </CardContent>
         </Card>
 
-
+        {/* Platform health */}
         <Card>
           <CardContent className="p-6">
-
             <h2 className="font-semibold">
               Platform Health
             </h2>
 
-            <div className="mt-5 space-y-4">
-
+            <div className="mt-5 space-y-5">
+              {/* Gear */}
               <div>
                 <div className="flex justify-between text-sm">
                   <span>
@@ -336,7 +704,13 @@ export default async function AdminDashboardPage() {
                   </span>
 
                   <span>
-                    {availableGear}/{gear.length}
+                    {
+                      availableGear
+                    }
+                    /
+                    {
+                      gear.length
+                    }
                   </span>
                 </div>
 
@@ -344,21 +718,19 @@ export default async function AdminDashboardPage() {
                   <div
                     className="h-full rounded-full bg-primary"
                     style={{
-                      width:`${
+                      width: `${
                         gear.length
-                        ?
-                        (availableGear /
-                        gear.length)*100
-                        :
-                        0
+                          ? (availableGear /
+                              gear.length) *
+                            100
+                          : 0
                       }%`,
                     }}
                   />
                 </div>
-
               </div>
 
-
+              {/* Users */}
               <div>
                 <div className="flex justify-between text-sm">
                   <span>
@@ -366,7 +738,13 @@ export default async function AdminDashboardPage() {
                   </span>
 
                   <span>
-                    {activeUsers}/{users.length}
+                    {
+                      activeUsers
+                    }
+                    /
+                    {
+                      users.length
+                    }
                   </span>
                 </div>
 
@@ -374,27 +752,21 @@ export default async function AdminDashboardPage() {
                   <div
                     className="h-full rounded-full bg-primary"
                     style={{
-                      width:`${
+                      width: `${
                         users.length
-                        ?
-                        (activeUsers /
-                        users.length)*100
-                        :
-                        0
+                          ? (activeUsers /
+                              users.length) *
+                            100
+                          : 0
                       }%`,
                     }}
                   />
                 </div>
-
               </div>
-
             </div>
-
           </CardContent>
         </Card>
-
       </section>
-
     </div>
   );
 }

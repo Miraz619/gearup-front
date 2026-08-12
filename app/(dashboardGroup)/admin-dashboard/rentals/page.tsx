@@ -1,79 +1,68 @@
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { getAdminDashboardData } from "@/service/getAdminDashboardData";
+
+import { Input } from "@/components/ui/input";
+
 import {
-  CalendarDays,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
+import { getAdminDashboardData } from "@/service/getAdminDashboardData";
+
+import {
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
   Clock3,
   CreditCard,
-  Package,
   ReceiptText,
+  Search,
   ShoppingBag,
-  UserRound,
-  WalletCards,
-  XCircle,
+  X,
 } from "lucide-react";
 
-const statusTheme = {
-  PLACED: {
-    label: "Placed",
-    card: "border-l-amber-500",
-    header:
-      "bg-amber-50/70 dark:bg-amber-950/20",
-    badge:
-      "border-amber-300 bg-amber-100 text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300",
-  },
-  CONFIRMED: {
-    label: "Confirmed",
-    card: "border-l-blue-500",
-    header:
-      "bg-blue-50/70 dark:bg-blue-950/20",
-    badge:
-      "border-blue-300 bg-blue-100 text-blue-800 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-300",
-  },
-  PAID: {
-    label: "Paid",
-    card: "border-l-violet-500",
-    header:
-      "bg-violet-50/70 dark:bg-violet-950/20",
-    badge:
-      "border-violet-300 bg-violet-100 text-violet-800 dark:border-violet-800 dark:bg-violet-950 dark:text-violet-300",
-  },
-  PICKED_UP: {
-    label: "Picked Up",
-    card: "border-l-emerald-500",
-    header:
-      "bg-emerald-50/70 dark:bg-emerald-950/20",
-    badge:
-      "border-emerald-300 bg-emerald-100 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-300",
-  },
-  RETURNED: {
-    label: "Returned",
-    card: "border-l-slate-500",
-    header:
-      "bg-slate-50 dark:bg-slate-900/50",
-    badge:
-      "border-slate-300 bg-slate-100 text-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300",
-  },
-  CANCELLED: {
-    label: "Cancelled",
-    card: "border-l-rose-500",
-    header:
-      "bg-rose-50/70 dark:bg-rose-950/20",
-    badge:
-      "border-rose-300 bg-rose-100 text-rose-800 dark:border-rose-800 dark:bg-rose-950 dark:text-rose-300",
-  },
+import Link from "next/link";
+
+type AdminRentalsPageProps = {
+  searchParams: Promise<{
+    search?: string;
+    status?: string;
+    page?: string;
+  }>;
 };
 
-function formatCurrency(value: string | number) {
-  return Number(value).toLocaleString("en-BD", {
-    maximumFractionDigits: 2,
-  });
+const RENTALS_PER_PAGE = 6;
+
+const rentalStatuses = [
+  "PLACED",
+  "CONFIRMED",
+  "PAID",
+  "PICKED_UP",
+  "RETURNED",
+  "CANCELLED",
+];
+
+function formatCurrency(
+  value: string | number,
+) {
+  return Number(value).toLocaleString(
+    "en-BD",
+    {
+      maximumFractionDigits: 2,
+    },
+  );
 }
 
 function formatDate(value: string) {
@@ -83,77 +72,261 @@ function formatDate(value: string) {
     return "Unavailable";
   }
 
-  return new Intl.DateTimeFormat("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  }).format(date);
+  return new Intl.DateTimeFormat(
+    "en-GB",
+    {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    },
+  ).format(date);
 }
 
-function getRentalDays(
-  startDate: string,
-  endDate: string,
-) {
-  const start = new Date(startDate).getTime();
-  const end = new Date(endDate).getTime();
+function formatStatus(status: string) {
+  return status
+    .replace(/_/g, " ")
+    .toLowerCase()
+    .replace(
+      /\b\w/g,
+      (letter) =>
+        letter.toUpperCase(),
+    );
+}
 
-  if (
-    Number.isNaN(start) ||
-    Number.isNaN(end)
-  ) {
-    return 0;
+function getStatusClass(
+  status: string,
+) {
+  switch (status) {
+    case "PLACED":
+      return "border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300";
+
+    case "CONFIRMED":
+      return "border-blue-300 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-300";
+
+    case "PAID":
+      return "border-violet-300 bg-violet-50 text-violet-700 dark:border-violet-800 dark:bg-violet-950 dark:text-violet-300";
+
+    case "PICKED_UP":
+      return "border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-300";
+
+    case "RETURNED":
+      return "border-slate-300 bg-slate-50 text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300";
+
+    case "CANCELLED":
+      return "border-rose-300 bg-rose-50 text-rose-700 dark:border-rose-800 dark:bg-rose-950 dark:text-rose-300";
+
+    default:
+      return "";
+  }
+}
+
+function createPageUrl({
+  page,
+  search,
+  status,
+}: {
+  page: number;
+  search: string;
+  status: string;
+}) {
+  const params =
+    new URLSearchParams();
+
+  if (search) {
+    params.set(
+      "search",
+      search,
+    );
   }
 
-  return Math.max(
-    1,
-    Math.ceil(
-      (end - start) /
-        (1000 * 60 * 60 * 24),
-    ),
+  if (
+    status &&
+    status !== "ALL"
+  ) {
+    params.set(
+      "status",
+      status,
+    );
+  }
+
+  params.set(
+    "page",
+    page.toString(),
   );
+
+  return `/admin-dashboard/rentals?${params.toString()}`;
 }
 
-export default async function AdminRentalsPage() {
+export default async function AdminRentalsPage({
+  searchParams,
+}: AdminRentalsPageProps) {
+  const params =
+    await searchParams;
+
   const { rentals } =
     await getAdminDashboardData();
 
-  const activeRentals = rentals.filter(
-    (rental) =>
-      [
-        "PLACED",
-        "CONFIRMED",
-        "PAID",
-        "PICKED_UP",
-      ].includes(rental.status),
-  ).length;
+  const search =
+    params.search?.trim() || "";
 
-  const completedRentals = rentals.filter(
-    (rental) =>
-      rental.status === "RETURNED",
-  ).length;
+  const status =
+    params.status || "ALL";
 
-  const cancelledRentals = rentals.filter(
-    (rental) =>
-      rental.status === "CANCELLED",
-  ).length;
-
-  const totalRevenue = rentals
-    .filter(
-      (rental) =>
-        rental.payment?.status ===
-        "COMPLETED",
-    )
-    .reduce(
-      (total, rental) =>
-        total +
-        Number(
-          rental.payment?.amount || 0,
-        ),
-      0,
+  const requestedPage =
+    Number(
+      params.page || "1",
     );
+
+  const currentPage =
+    Number.isInteger(
+      requestedPage,
+    ) &&
+    requestedPage > 0
+      ? requestedPage
+      : 1;
+
+  /*
+   * Dashboard statistics
+   */
+
+  const activeRentals =
+    rentals.filter(
+      (rental) =>
+        [
+          "PLACED",
+          "CONFIRMED",
+          "PAID",
+          "PICKED_UP",
+        ].includes(
+          rental.status,
+        ),
+    ).length;
+
+  const completedRentals =
+    rentals.filter(
+      (rental) =>
+        rental.status ===
+        "RETURNED",
+    ).length;
+
+  const cancelledRentals =
+    rentals.filter(
+      (rental) =>
+        rental.status ===
+        "CANCELLED",
+    ).length;
+
+  const totalRevenue =
+    rentals
+      .filter(
+        (rental) =>
+          rental.payment
+            ?.status ===
+          "COMPLETED",
+      )
+      .reduce(
+        (
+          total,
+          rental,
+        ) =>
+          total +
+          Number(
+            rental.payment
+              ?.amount || 0,
+          ),
+        0,
+      );
+
+  /*
+   * Search and filtering
+   */
+
+  const filteredRentals =
+    rentals.filter(
+      (rental) => {
+        const normalizedSearch =
+          search.toLowerCase();
+
+        const matchesSearch =
+          !normalizedSearch ||
+          rental.id
+            .toLowerCase()
+            .includes(
+              normalizedSearch,
+            ) ||
+          rental.customer.name
+            .toLowerCase()
+            .includes(
+              normalizedSearch,
+            ) ||
+          rental.customer.email
+            .toLowerCase()
+            .includes(
+              normalizedSearch,
+            ) ||
+          rental.items.some(
+            (item) =>
+              item.gearItem.name
+                .toLowerCase()
+                .includes(
+                  normalizedSearch,
+                ) ||
+              item.gearItem.brand
+                .toLowerCase()
+                .includes(
+                  normalizedSearch,
+                ),
+          );
+
+        const matchesStatus =
+          status === "ALL" ||
+          rental.status ===
+            status;
+
+        return (
+          matchesSearch &&
+          matchesStatus
+        );
+      },
+    );
+
+  /*
+   * Pagination
+   */
+
+  const totalPages =
+    Math.max(
+      1,
+      Math.ceil(
+        filteredRentals.length /
+          RENTALS_PER_PAGE,
+      ),
+    );
+
+  const safeCurrentPage =
+    Math.min(
+      currentPage,
+      totalPages,
+    );
+
+  const startIndex =
+    (safeCurrentPage - 1) *
+    RENTALS_PER_PAGE;
+
+  const paginatedRentals =
+    filteredRentals.slice(
+      startIndex,
+      startIndex +
+        RENTALS_PER_PAGE,
+    );
+
+  const hasFilters =
+    Boolean(search) ||
+    status !== "ALL";
 
   return (
     <div className="space-y-8 pb-10">
+      {/* Heading */}
       <section className="rounded-3xl border bg-card px-6 py-8 shadow-sm sm:px-8">
         <Badge variant="secondary">
           <ReceiptText className="size-3.5" />
@@ -165,14 +338,17 @@ export default async function AdminRentalsPage() {
         </h1>
 
         <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
-          Review every rental order,
-          customer, payment, equipment, and
-          current rental status.
+          Review rental orders,
+          customers, payments,
+          equipment and current
+          rental status.
         </p>
       </section>
 
+      {/* Statistics */}
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Card className="shadow-sm">
+        {/* Total */}
+        <Card>
           <CardContent className="flex items-center gap-4 p-5">
             <div className="flex size-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-700 dark:bg-slate-900 dark:text-slate-300">
               <ShoppingBag className="size-5" />
@@ -190,7 +366,8 @@ export default async function AdminRentalsPage() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-sm">
+        {/* Active */}
+        <Card>
           <CardContent className="flex items-center gap-4 p-5">
             <div className="flex size-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300">
               <Clock3 className="size-5" />
@@ -208,7 +385,8 @@ export default async function AdminRentalsPage() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-sm">
+        {/* Completed */}
+        <Card>
           <CardContent className="flex items-center gap-4 p-5">
             <div className="flex size-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
               <CheckCircle2 className="size-5" />
@@ -220,13 +398,16 @@ export default async function AdminRentalsPage() {
               </p>
 
               <p className="mt-1 text-2xl font-bold">
-                {completedRentals}
+                {
+                  completedRentals
+                }
               </p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="shadow-sm">
+        {/* Revenue */}
+        <Card>
           <CardContent className="flex items-center gap-4 p-5">
             <div className="flex size-12 items-center justify-center rounded-2xl bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300">
               <CreditCard className="size-5" />
@@ -248,217 +429,326 @@ export default async function AdminRentalsPage() {
         </Card>
       </section>
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">
-            All Rental Orders
-          </h2>
+      {/* Search and filters */}
+      <Card>
+        <CardHeader className="border-b">
+          <CardTitle>
+            Search and Filter Rentals
+          </CardTitle>
+        </CardHeader>
 
-          <p className="mt-1 text-sm text-muted-foreground">
-            Each order is displayed
-            separately for easier review.
-          </p>
-        </div>
+        <CardContent className="p-5">
+          <form
+            action="/admin-dashboard/rentals"
+            method="GET"
+            className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px_auto]"
+          >
+            {/* Search */}
+            <div className="relative">
+              <label
+                htmlFor="rental-search"
+                className="sr-only"
+              >
+                Search rentals
+              </label>
 
-        <div className="flex flex-wrap gap-2">
-          <Badge variant="secondary">
-            {rentals.length} total
-          </Badge>
+              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
 
-          <Badge variant="outline">
-            {cancelledRentals} cancelled
-          </Badge>
-        </div>
-      </div>
+              <Input
+                id="rental-search"
+                name="search"
+                defaultValue={
+                  search
+                }
+                placeholder="Search order, customer or gear"
+                className="pl-9"
+              />
+            </div>
 
-      {rentals.length === 0 ? (
-        <Card>
-          <CardContent className="flex min-h-80 flex-col items-center justify-center text-center">
-            <ShoppingBag className="size-12 text-muted-foreground" />
+            {/* Status */}
+            <div>
+              <label
+                htmlFor="rental-status"
+                className="sr-only"
+              >
+                Filter by rental
+                status
+              </label>
 
-            <h2 className="mt-4 text-lg font-semibold">
-              No rentals found
-            </h2>
+              <select
+                id="rental-status"
+                name="status"
+                defaultValue={
+                  status
+                }
+                className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              >
+                <option value="ALL">
+                  All statuses
+                </option>
 
-            <p className="mt-2 text-sm text-muted-foreground">
-              Rental orders will appear
-              here.
-            </p>
-          </CardContent>
-        </Card>
-      ) : (
-        <section className="space-y-7">
-          {rentals.map(
-            (rental, index) => {
-              const theme =
-                statusTheme[
-                  rental.status
-                ];
+                {rentalStatuses.map(
+                  (
+                    rentalStatus,
+                  ) => (
+                    <option
+                      key={
+                        rentalStatus
+                      }
+                      value={
+                        rentalStatus
+                      }
+                    >
+                      {formatStatus(
+                        rentalStatus,
+                      )}
+                    </option>
+                  ),
+                )}
+              </select>
+            </div>
 
-              const rentalDays =
-                getRentalDays(
-                  rental.startDate,
-                  rental.endDate,
-                );
+            {/* Actions */}
+            <div className="flex gap-2">
+              <Button type="submit">
+                <Search className="size-4" />
+                Apply
+              </Button>
 
-              const totalUnits =
-                rental.items.reduce(
-                  (total, item) =>
-                    total +
-                    item.quantity,
-                  0,
-                );
-
-              return (
-                <Card
-                  key={rental.id}
-                  className={`overflow-hidden border-l-4 shadow-sm transition-all duration-300 hover:shadow-md ${theme.card}`}
+              {hasFilters && (
+                <Button
+                  variant="outline"
+                  asChild
                 >
-                  <CardHeader
-                    className={`border-b px-5 py-5 sm:px-6 ${theme.header}`}
-                  >
-                    <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-                      <div className="flex items-start gap-4">
-                        <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl border bg-background text-lg font-bold shadow-sm">
-                          {String(
-                            index + 1,
-                          ).padStart(
-                            2,
-                            "0",
-                          )}
-                        </div>
+                  <Link href="/admin-dashboard/rentals">
+                    <X className="size-4" />
+                    Clear
+                  </Link>
+                </Button>
+              )}
+            </div>
+          </form>
+        </CardContent>
+      </Card>
 
-                        <div>
-                          <div className="flex flex-wrap items-center gap-2">
-                            <CardTitle className="text-lg sm:text-xl">
-                              Rental #
+      {/* Rental table */}
+      <Card className="overflow-hidden">
+        <CardHeader className="border-b">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <CardTitle>
+              All Rental Orders
+            </CardTitle>
+
+            <div className="flex gap-2">
+              <Badge variant="secondary">
+                {
+                  filteredRentals.length
+                }{" "}
+                {filteredRentals.length ===
+                1
+                  ? "result"
+                  : "results"}
+              </Badge>
+
+              <Badge variant="outline">
+                {
+                  cancelledRentals
+                }{" "}
+                cancelled
+              </Badge>
+            </div>
+          </div>
+        </CardHeader>
+
+        <CardContent className="p-0">
+          {paginatedRentals.length ===
+          0 ? (
+            /* Empty state */
+            <div className="py-16 text-center">
+              <ShoppingBag className="mx-auto size-12 text-muted-foreground" />
+
+              <p className="mt-4 font-semibold">
+                No matching
+                rentals found
+              </p>
+
+              <p className="mt-2 text-sm text-muted-foreground">
+                Try changing your
+                search or selected
+                status.
+              </p>
+
+              {hasFilters && (
+                <Button
+                  variant="outline"
+                  className="mt-5"
+                  asChild
+                >
+                  <Link href="/admin-dashboard/rentals">
+                    Clear Filters
+                  </Link>
+                </Button>
+              )}
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="min-w-[140px]">
+                    Rental
+                  </TableHead>
+
+                  <TableHead className="min-w-[200px]">
+                    Customer
+                  </TableHead>
+
+                  <TableHead className="min-w-[190px]">
+                    Period
+                  </TableHead>
+
+                  <TableHead>
+                    Items
+                  </TableHead>
+
+                  <TableHead>
+                    Status
+                  </TableHead>
+
+                  <TableHead>
+                    Payment
+                  </TableHead>
+
+                  <TableHead className="text-right">
+                    Total
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+
+              <TableBody>
+                {paginatedRentals.map(
+                  (rental) => {
+                    const totalUnits =
+                      rental.items.reduce(
+                        (
+                          total,
+                          item,
+                        ) =>
+                          total +
+                          item.quantity,
+                        0,
+                      );
+
+                    return (
+                      <TableRow
+                        key={
+                          rental.id
+                        }
+                      >
+                        {/* Rental */}
+                        <TableCell>
+                          <div>
+                            <p className="font-medium">
+                              #
                               {rental.id
-                                .slice(0, 8)
+                                .slice(
+                                  0,
+                                  8,
+                                )
                                 .toUpperCase()}
-                            </CardTitle>
+                            </p>
 
-                            <Badge
-                              variant="outline"
-                              className={
-                                theme.badge
-                              }
-                            >
-                              {rental.status ===
-                                "CANCELLED" && (
-                                <XCircle className="size-3.5" />
+                            <p className="mt-1 text-xs text-muted-foreground">
+                              {formatDate(
+                                rental.createdAt,
                               )}
-
-                              {
-                                theme.label
-                              }
-                            </Badge>
+                            </p>
                           </div>
+                        </TableCell>
 
-                          <p className="mt-2 text-sm text-muted-foreground">
-                            Created{" "}
+                        {/* Customer */}
+                        <TableCell>
+                          <div>
+                            <p className="font-medium">
+                              {
+                                rental
+                                  .customer
+                                  .name
+                              }
+                            </p>
+
+                            <p className="max-w-[200px] truncate text-xs text-muted-foreground">
+                              {
+                                rental
+                                  .customer
+                                  .email
+                              }
+                            </p>
+                          </div>
+                        </TableCell>
+
+                        {/* Period */}
+                        <TableCell>
+                          <p className="text-sm">
                             {formatDate(
-                              rental.createdAt,
+                              rental.startDate,
                             )}
                           </p>
-                        </div>
-                      </div>
 
-                      <div className="rounded-2xl border bg-background px-5 py-4 shadow-sm lg:min-w-48 lg:text-right">
-                        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                          Order Total
-                        </p>
+                          <p className="text-xs text-muted-foreground">
+                            to{" "}
+                            {formatDate(
+                              rental.endDate,
+                            )}
+                          </p>
+                        </TableCell>
 
-                        <p className="mt-1 text-2xl font-bold">
-                          ৳
-                          {formatCurrency(
-                            rental.totalAmount,
-                          )}
-                        </p>
-                      </div>
-                    </div>
-                  </CardHeader>
+                        {/* Items */}
+                        <TableCell>
+                          <div>
+                            <p className="font-medium">
+                              {
+                                totalUnits
+                              }{" "}
+                              {totalUnits ===
+                              1
+                                ? "unit"
+                                : "units"}
+                            </p>
 
-                  <CardContent className="space-y-6 p-5 sm:p-6">
-                    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                      <div className="rounded-2xl border bg-muted/20 p-4">
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <UserRound className="size-4" />
-                          Customer
-                        </div>
+                            <p className="text-xs text-muted-foreground">
+                              {
+                                rental
+                                  .items
+                                  .length
+                              }{" "}
+                              {rental.items
+                                .length ===
+                              1
+                                ? "item"
+                                : "items"}
+                            </p>
+                          </div>
+                        </TableCell>
 
-                        <p className="mt-3 font-semibold">
-                          {
-                            rental
-                              .customer
-                              .name
-                          }
-                        </p>
+                        {/* Status */}
+                        <TableCell>
+                          <Badge
+                            variant="outline"
+                            className={getStatusClass(
+                              rental.status,
+                            )}
+                          >
+                            {formatStatus(
+                              rental.status,
+                            )}
+                          </Badge>
+                        </TableCell>
 
-                        <p className="mt-1 break-all text-sm text-muted-foreground">
-                          {
-                            rental
-                              .customer
-                              .email
-                          }
-                        </p>
-                      </div>
-
-                      <div className="rounded-2xl border bg-muted/20 p-4">
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <CalendarDays className="size-4" />
-                          Rental Period
-                        </div>
-
-                        <p className="mt-3 font-semibold">
-                          {formatDate(
-                            rental.startDate,
-                          )}
-                        </p>
-
-                        <p className="mt-1 text-sm text-muted-foreground">
-                          to{" "}
-                          {formatDate(
-                            rental.endDate,
-                          )}
-                        </p>
-                      </div>
-
-                      <div className="rounded-2xl border bg-muted/20 p-4">
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Clock3 className="size-4" />
-                          Duration
-                        </div>
-
-                        <p className="mt-3 font-semibold">
-                          {rentalDays}{" "}
-                          {rentalDays ===
-                          1
-                            ? "day"
-                            : "days"}
-                        </p>
-
-                        <p className="mt-1 text-sm text-muted-foreground">
-                          {
-                            totalUnits
-                          }{" "}
-                          equipment{" "}
-                          {totalUnits ===
-                          1
-                            ? "unit"
-                            : "units"}
-                        </p>
-                      </div>
-
-                      <div className="rounded-2xl border bg-muted/20 p-4">
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <WalletCards className="size-4" />
-                          Payment
-                        </div>
-
-                        {rental.payment ? (
-                          <>
-                            <div className="mt-3 flex flex-wrap gap-2">
-                              <Badge variant="outline">
+                        {/* Payment */}
+                        <TableCell>
+                          {rental.payment ? (
+                            <div>
+                              <Badge variant="secondary">
                                 {
                                   rental
                                     .payment
@@ -466,168 +756,141 @@ export default async function AdminRentalsPage() {
                                 }
                               </Badge>
 
-                              <Badge variant="secondary">
+                              <p className="mt-1 text-xs text-muted-foreground">
                                 {
                                   rental
                                     .payment
                                     .method
                                 }
-                              </Badge>
+                              </p>
                             </div>
+                          ) : (
+                            <Badge variant="outline">
+                              Not Paid
+                            </Badge>
+                          )}
+                        </TableCell>
 
-                            <p className="mt-2 font-semibold">
-                              ৳
-                              {formatCurrency(
-                                rental
-                                  .payment
-                                  .amount,
-                              )}
-                            </p>
-                          </>
-                        ) : (
-                          <>
-                            <p className="mt-3 font-semibold">
-                              Not paid
-                            </p>
-
-                            <p className="mt-1 text-sm text-muted-foreground">
-                              Payment has
-                              not been
-                              created.
-                            </p>
-                          </>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="overflow-hidden rounded-2xl border">
-                      <div className="flex items-center justify-between border-b bg-muted/30 px-5 py-4">
-                        <div>
-                          <h3 className="font-semibold">
-                            Rental
-                            Equipment
-                          </h3>
-
-                          <p className="mt-1 text-sm text-muted-foreground">
-                            Equipment
-                            included in
-                            this order
-                          </p>
-                        </div>
-
-                        <Badge variant="secondary">
-                          {
-                            rental.items
-                              .length
-                          }{" "}
-                          {rental.items
-                            .length === 1
-                            ? "item"
-                            : "items"}
-                        </Badge>
-                      </div>
-
-                      <div className="hidden grid-cols-[minmax(0,1fr)_100px_130px_130px] gap-4 border-b bg-muted/10 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground md:grid">
-                        <span>
-                          Equipment
-                        </span>
-
-                        <span className="text-center">
-                          Quantity
-                        </span>
-
-                        <span className="text-right">
-                          Daily Price
-                        </span>
-
-                        <span className="text-right">
-                          Subtotal
-                        </span>
-                      </div>
-
-                      <div className="divide-y">
-                        {rental.items.map(
-                          (item) => (
-                            <div
-                              key={
-                                item.id
-                              }
-                              className="grid gap-4 px-5 py-4 transition-colors hover:bg-muted/20 md:grid-cols-[minmax(0,1fr)_100px_130px_130px] md:items-center"
-                            >
-                              <div className="flex min-w-0 items-center gap-3">
-                                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted">
-                                  <Package className="size-4" />
-                                </div>
-
-                                <div className="min-w-0">
-                                  <p className="truncate font-semibold">
-                                    {
-                                      item
-                                        .gearItem
-                                        .name
-                                    }
-                                  </p>
-
-                                  <p className="mt-1 truncate text-sm text-muted-foreground">
-                                    {
-                                      item
-                                        .gearItem
-                                        .brand
-                                    }
-                                  </p>
-                                </div>
-                              </div>
-
-                              <div className="flex items-center justify-between md:block md:text-center">
-                                <span className="text-sm text-muted-foreground md:hidden">
-                                  Quantity
-                                </span>
-
-                                <Badge variant="outline">
-                                  {
-                                    item.quantity
-                                  }
-                                </Badge>
-                              </div>
-
-                              <div className="flex items-center justify-between md:block md:text-right">
-                                <span className="text-sm text-muted-foreground md:hidden">
-                                  Daily
-                                  Price
-                                </span>
-
-                                <span className="font-medium">
-                                  ৳
-                                  {formatCurrency(
-                                    item.pricePerDay,
-                                  )}
-                                </span>
-                              </div>
-
-                              <div className="flex items-center justify-between md:block md:text-right">
-                                <span className="text-sm text-muted-foreground md:hidden">
-                                  Subtotal
-                                </span>
-
-                                <span className="font-bold">
-                                  ৳
-                                  {formatCurrency(
-                                    item.subtotal,
-                                  )}
-                                </span>
-                              </div>
-                            </div>
-                          ),
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            },
+                        {/* Total */}
+                        <TableCell className="text-right font-semibold">
+                          ৳
+                          {formatCurrency(
+                            rental.totalAmount,
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  },
+                )}
+              </TableBody>
+            </Table>
           )}
-        </section>
-      )}
+        </CardContent>
+      </Card>
+
+      {/* Pagination */}
+      {filteredRentals.length >
+        0 &&
+        totalPages > 1 && (
+          <div className="flex flex-col items-center justify-between gap-4 rounded-2xl border bg-card p-4 sm:flex-row">
+            <p className="text-sm text-muted-foreground">
+              Showing{" "}
+              {startIndex + 1}–
+              {Math.min(
+                startIndex +
+                  RENTALS_PER_PAGE,
+                filteredRentals.length,
+              )}{" "}
+              of{" "}
+              {
+                filteredRentals.length
+              }{" "}
+              rentals
+            </p>
+
+            <div className="flex items-center gap-2">
+              {/* Previous */}
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={
+                  safeCurrentPage ===
+                  1
+                }
+                asChild={
+                  safeCurrentPage !==
+                  1
+                }
+              >
+                {safeCurrentPage ===
+                1 ? (
+                  <>
+                    <ChevronLeft className="size-4" />
+                    Previous
+                  </>
+                ) : (
+                  <Link
+                    href={createPageUrl(
+                      {
+                        page:
+                          safeCurrentPage -
+                          1,
+                        search,
+                        status,
+                      },
+                    )}
+                  >
+                    <ChevronLeft className="size-4" />
+                    Previous
+                  </Link>
+                )}
+              </Button>
+
+              <Badge variant="outline">
+                Page{" "}
+                {safeCurrentPage}{" "}
+                of {totalPages}
+              </Badge>
+
+              {/* Next */}
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={
+                  safeCurrentPage ===
+                  totalPages
+                }
+                asChild={
+                  safeCurrentPage !==
+                  totalPages
+                }
+              >
+                {safeCurrentPage ===
+                totalPages ? (
+                  <>
+                    Next
+                    <ChevronRight className="size-4" />
+                  </>
+                ) : (
+                  <Link
+                    href={createPageUrl(
+                      {
+                        page:
+                          safeCurrentPage +
+                          1,
+                        search,
+                        status,
+                      },
+                    )}
+                  >
+                    Next
+                    <ChevronRight className="size-4" />
+                  </Link>
+                )}
+              </Button>
+            </div>
+          </div>
+        )}
     </div>
   );
 }

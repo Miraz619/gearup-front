@@ -1,47 +1,280 @@
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+
+import { Input } from "@/components/ui/input";
+
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
 import { getAdminDashboardData } from "@/service/getAdminDashboardData";
+
 import {
   Boxes,
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
   Layers3,
   PackageCheck,
   PackageX,
+  Search,
   UserRound,
+  X,
 } from "lucide-react";
-import Image from "next/image";
 
-function formatCurrency(value: string | number) {
-  return Number(value).toLocaleString("en-BD", {
-    maximumFractionDigits: 2,
-  });
+import Image from "next/image";
+import Link from "next/link";
+
+type AdminGearPageProps = {
+  searchParams: Promise<{
+    search?: string;
+    category?: string;
+    status?: string;
+    page?: string;
+  }>;
+};
+
+const GEAR_PER_PAGE = 6;
+
+function formatCurrency(
+  value: string | number,
+) {
+  return Number(value).toLocaleString(
+    "en-BD",
+    {
+      maximumFractionDigits: 2,
+    },
+  );
 }
 
-export default async function AdminGearPage() {
-  const { gear } = await getAdminDashboardData();
+function createPageUrl({
+  page,
+  search,
+  category,
+  status,
+}: {
+  page: number;
+  search: string;
+  category: string;
+  status: string;
+}) {
+  const params =
+    new URLSearchParams();
 
-  const availableGear = gear.filter(
-    (item) => item.isAvailable && item.stock > 0,
-  ).length;
+  if (search) {
+    params.set(
+      "search",
+      search,
+    );
+  }
 
-  const unavailableGear = gear.filter(
-    (item) => !item.isAvailable || item.stock === 0,
-  ).length;
+  if (
+    category &&
+    category !== "ALL"
+  ) {
+    params.set(
+      "category",
+      category,
+    );
+  }
 
-  const totalStock = gear.reduce(
-    (total, item) => total + Number(item.stock || 0),
-    0,
+  if (
+    status &&
+    status !== "ALL"
+  ) {
+    params.set(
+      "status",
+      status,
+    );
+  }
+
+  params.set(
+    "page",
+    page.toString(),
   );
+
+  return `/admin-dashboard/gear?${params.toString()}`;
+}
+
+export default async function AdminGearPage({
+  searchParams,
+}: AdminGearPageProps) {
+  const params =
+    await searchParams;
+
+  const { gear } =
+    await getAdminDashboardData();
+
+  const search =
+    params.search?.trim() || "";
+
+  const category =
+    params.category || "ALL";
+
+  const status =
+    params.status || "ALL";
+
+  const requestedPage =
+    Number(
+      params.page || "1",
+    );
+
+  const currentPage =
+    Number.isInteger(
+      requestedPage,
+    ) &&
+    requestedPage > 0
+      ? requestedPage
+      : 1;
+
+  /*
+   * Dashboard statistics
+   */
+
+  const availableGear =
+    gear.filter(
+      (item) =>
+        item.isAvailable &&
+        item.stock > 0,
+    ).length;
+
+  const unavailableGear =
+    gear.filter(
+      (item) =>
+        !item.isAvailable ||
+        item.stock === 0,
+    ).length;
+
+  const totalStock =
+    gear.reduce(
+      (total, item) =>
+        total +
+        Number(
+          item.stock || 0,
+        ),
+      0,
+    );
+
+  /*
+   * Categories for filter
+   */
+
+  const categories =
+    Array.from(
+      new Set(
+        gear.map(
+          (item) =>
+            item.category.name,
+        ),
+      ),
+    ).sort();
+
+  /*
+   * Search and filtering
+   */
+
+  const filteredGear =
+    gear.filter((item) => {
+      const normalizedSearch =
+        search.toLowerCase();
+
+      const isAvailable =
+        item.isAvailable &&
+        item.stock > 0;
+
+      const matchesSearch =
+        !normalizedSearch ||
+        item.name
+          .toLowerCase()
+          .includes(
+            normalizedSearch,
+          ) ||
+        item.brand
+          .toLowerCase()
+          .includes(
+            normalizedSearch,
+          ) ||
+        item.provider.name
+          .toLowerCase()
+          .includes(
+            normalizedSearch,
+          );
+
+      const matchesCategory =
+        category === "ALL" ||
+        item.category.name ===
+          category;
+
+      const matchesStatus =
+        status === "ALL" ||
+        (status ===
+          "AVAILABLE" &&
+          isAvailable) ||
+        (status ===
+          "UNAVAILABLE" &&
+          !isAvailable);
+
+      return (
+        matchesSearch &&
+        matchesCategory &&
+        matchesStatus
+      );
+    });
+
+  /*
+   * Pagination
+   */
+
+  const totalPages =
+    Math.max(
+      1,
+      Math.ceil(
+        filteredGear.length /
+          GEAR_PER_PAGE,
+      ),
+    );
+
+  const safeCurrentPage =
+    Math.min(
+      currentPage,
+      totalPages,
+    );
+
+  const startIndex =
+    (safeCurrentPage - 1) *
+    GEAR_PER_PAGE;
+
+  const paginatedGear =
+    filteredGear.slice(
+      startIndex,
+      startIndex +
+        GEAR_PER_PAGE,
+    );
+
+  const hasFilters =
+    Boolean(search) ||
+    category !== "ALL" ||
+    status !== "ALL";
 
   return (
     <div className="space-y-8">
+      {/* Page heading */}
       <section className="relative overflow-hidden rounded-3xl border border-primary/15 bg-gradient-to-br from-emerald-100 via-cyan-50 to-blue-100 px-6 py-8 shadow-sm dark:from-emerald-950/30 dark:via-cyan-950/20 dark:to-blue-950/30 sm:px-8">
         <div className="absolute -right-16 -top-20 size-56 rounded-full bg-primary/10 blur-3xl" />
+
         <div className="absolute -bottom-20 left-1/3 size-48 rounded-full bg-blue-400/10 blur-3xl" />
 
         <div className="relative">
@@ -55,12 +288,16 @@ export default async function AdminGearPage() {
           </h1>
 
           <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
-            Review all equipment listings, stock availability, categories, and
+            Review equipment
+            listings, stock
+            availability,
+            categories and
             provider information.
           </p>
         </div>
       </section>
 
+      {/* Statistics */}
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Card>
           <CardContent className="flex items-center gap-4 p-5">
@@ -69,8 +306,13 @@ export default async function AdminGearPage() {
             </div>
 
             <div>
-              <p className="text-sm text-muted-foreground">Total Listings</p>
-              <p className="text-2xl font-bold">{gear.length}</p>
+              <p className="text-sm text-muted-foreground">
+                Total Listings
+              </p>
+
+              <p className="text-2xl font-bold">
+                {gear.length}
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -82,8 +324,13 @@ export default async function AdminGearPage() {
             </div>
 
             <div>
-              <p className="text-sm text-muted-foreground">Available</p>
-              <p className="text-2xl font-bold">{availableGear}</p>
+              <p className="text-sm text-muted-foreground">
+                Available
+              </p>
+
+              <p className="text-2xl font-bold">
+                {availableGear}
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -95,8 +342,13 @@ export default async function AdminGearPage() {
             </div>
 
             <div>
-              <p className="text-sm text-muted-foreground">Unavailable</p>
-              <p className="text-2xl font-bold">{unavailableGear}</p>
+              <p className="text-sm text-muted-foreground">
+                Unavailable
+              </p>
+
+              <p className="text-2xl font-bold">
+                {unavailableGear}
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -108,131 +360,475 @@ export default async function AdminGearPage() {
             </div>
 
             <div>
-              <p className="text-sm text-muted-foreground">Total Stock</p>
-              <p className="text-2xl font-bold">{totalStock}</p>
+              <p className="text-sm text-muted-foreground">
+                Total Stock
+              </p>
+
+              <p className="text-2xl font-bold">
+                {totalStock}
+              </p>
             </div>
           </CardContent>
         </Card>
       </section>
 
+      {/* Search and filters */}
+      <Card>
+        <CardHeader className="border-b">
+          <CardTitle>
+            Search and Filter Gear
+          </CardTitle>
+        </CardHeader>
+
+        <CardContent className="p-5">
+          <form
+            action="/admin-dashboard/gear"
+            method="GET"
+            className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_200px_180px_auto]"
+          >
+            {/* Search */}
+            <div className="relative">
+              <label
+                htmlFor="gear-search"
+                className="sr-only"
+              >
+                Search gear
+              </label>
+
+              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+
+              <Input
+                id="gear-search"
+                name="search"
+                defaultValue={
+                  search
+                }
+                placeholder="Search name, brand or provider"
+                className="pl-9"
+              />
+            </div>
+
+            {/* Category */}
+            <div>
+              <label
+                htmlFor="category-filter"
+                className="sr-only"
+              >
+                Filter by category
+              </label>
+
+              <select
+                id="category-filter"
+                name="category"
+                defaultValue={
+                  category
+                }
+                className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              >
+                <option value="ALL">
+                  All categories
+                </option>
+
+                {categories.map(
+                  (item) => (
+                    <option
+                      key={
+                        item
+                      }
+                      value={
+                        item
+                      }
+                    >
+                      {item}
+                    </option>
+                  ),
+                )}
+              </select>
+            </div>
+
+            {/* Availability */}
+            <div>
+              <label
+                htmlFor="status-filter"
+                className="sr-only"
+              >
+                Filter by
+                availability
+              </label>
+
+              <select
+                id="status-filter"
+                name="status"
+                defaultValue={
+                  status
+                }
+                className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              >
+                <option value="ALL">
+                  All statuses
+                </option>
+
+                <option value="AVAILABLE">
+                  Available
+                </option>
+
+                <option value="UNAVAILABLE">
+                  Unavailable
+                </option>
+              </select>
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-2">
+              <Button type="submit">
+                <Search className="size-4" />
+                Apply
+              </Button>
+
+              {hasFilters && (
+                <Button
+                  variant="outline"
+                  asChild
+                >
+                  <Link href="/admin-dashboard/gear">
+                    <X className="size-4" />
+                    Clear
+                  </Link>
+                </Button>
+              )}
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+
+      {/* Gear table */}
       <Card className="overflow-hidden">
         <CardHeader className="border-b">
-          <CardTitle>All Gear Listings</CardTitle>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <CardTitle>
+              All Gear Listings
+            </CardTitle>
+
+            <Badge variant="secondary">
+              {filteredGear.length}{" "}
+              {filteredGear.length ===
+              1
+                ? "result"
+                : "results"}
+            </Badge>
+          </div>
         </CardHeader>
 
         <CardContent className="p-0">
-          {gear.length === 0 ? (
+          {paginatedGear.length ===
+          0 ? (
+            /* Empty state */
             <div className="py-16 text-center">
               <Boxes className="mx-auto size-12 text-muted-foreground" />
 
-              <p className="mt-4 font-semibold">No gear found</p>
+              <p className="mt-4 font-semibold">
+                No matching gear
+                found
+              </p>
 
               <p className="mt-2 text-sm text-muted-foreground">
-                Provider equipment listings will appear here.
+                Try changing your
+                search or selected
+                filters.
               </p>
+
+              {hasFilters && (
+                <Button
+                  variant="outline"
+                  className="mt-5"
+                  asChild
+                >
+                  <Link href="/admin-dashboard/gear">
+                    Clear Filters
+                  </Link>
+                </Button>
+              )}
             </div>
           ) : (
-            <div className="divide-y">
-              {gear.map((item) => {
-                const isAvailable =
-                  item.isAvailable && item.stock > 0;
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="min-w-[240px]">
+                    Gear
+                  </TableHead>
 
-                return (
-                  <div
-                    key={item.id}
-                    className="grid gap-5 p-5 transition-colors hover:bg-muted/40 lg:grid-cols-[100px_minmax(0,1fr)_auto] lg:items-center"
-                  >
-                    <div className="relative aspect-square overflow-hidden rounded-2xl border bg-muted">
-                      {item.imageUrl ? (
-                        <Image
-                          src={item.imageUrl}
-                          alt={item.name}
-                          fill
-                          sizes="100px"
-                          className="object-cover"
-                          unoptimized
-                        />
-                      ) : (
-                        <div className="flex h-full items-center justify-center">
-                          <Boxes className="size-8 text-muted-foreground" />
-                        </div>
-                      )}
-                    </div>
+                  <TableHead>
+                    Category
+                  </TableHead>
 
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h2 className="text-lg font-semibold">
-                          {item.name}
-                        </h2>
+                  <TableHead>
+                    Provider
+                  </TableHead>
 
-                        <Badge variant="secondary">
-                          {item.category.name}
-                        </Badge>
+                  <TableHead>
+                    Stock
+                  </TableHead>
 
-                        <Badge
-                          variant="outline"
-                          className={
-                            isAvailable
-                              ? "border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
-                              : "border-rose-300 bg-rose-50 text-rose-700 dark:border-rose-800 dark:bg-rose-950 dark:text-rose-300"
-                          }
-                        >
-                          {isAvailable ? (
-                            <>
-                              <CheckCircle2 className="size-3.5" />
-                              Available
-                            </>
-                          ) : (
-                            <>
-                              <PackageX className="size-3.5" />
-                              Unavailable
-                            </>
+                  <TableHead>
+                    Price / Day
+                  </TableHead>
+
+                  <TableHead>
+                    Status
+                  </TableHead>
+
+                  <TableHead className="text-right">
+                    Action
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+
+              <TableBody>
+                {paginatedGear.map(
+                  (item) => {
+                    const isAvailable =
+                      item.isAvailable &&
+                      item.stock > 0;
+
+                    return (
+                      <TableRow
+                        key={
+                          item.id
+                        }
+                      >
+                        {/* Gear */}
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <div className="relative size-12 shrink-0 overflow-hidden rounded-xl border bg-muted">
+                              {item.imageUrl ? (
+                                <Image
+                                  src={
+                                    item.imageUrl
+                                  }
+                                  alt={
+                                    item.name
+                                  }
+                                  fill
+                                  sizes="48px"
+                                  className="object-cover"
+                                  unoptimized
+                                />
+                              ) : (
+                                <div className="flex h-full items-center justify-center">
+                                  <Boxes className="size-5 text-muted-foreground" />
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="min-w-0">
+                              <p className="max-w-[180px] truncate font-medium">
+                                {
+                                  item.name
+                                }
+                              </p>
+
+                              <p className="text-xs text-muted-foreground">
+                                {
+                                  item.brand
+                                }
+                              </p>
+                            </div>
+                          </div>
+                        </TableCell>
+
+                        {/* Category */}
+                        <TableCell>
+                          <Badge variant="secondary">
+                            {
+                              item
+                                .category
+                                .name
+                            }
+                          </Badge>
+                        </TableCell>
+
+                        {/* Provider */}
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <UserRound className="size-4 text-muted-foreground" />
+
+                            <span className="max-w-[150px] truncate">
+                              {
+                                item
+                                  .provider
+                                  .name
+                              }
+                            </span>
+                          </div>
+                        </TableCell>
+
+                        {/* Stock */}
+                        <TableCell>
+                          {item.stock}
+                        </TableCell>
+
+                        {/* Price */}
+                        <TableCell className="font-medium">
+                          ৳
+                          {formatCurrency(
+                            item.pricePerDay,
                           )}
-                        </Badge>
-                      </div>
+                        </TableCell>
 
-                      <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted-foreground">
-                        {item.description || "No description is available."}
-                      </p>
+                        {/* Status */}
+                        <TableCell>
+                          <Badge
+                            variant="outline"
+                            className={
+                              isAvailable
+                                ? "border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
+                                : "border-rose-300 bg-rose-50 text-rose-700 dark:border-rose-800 dark:bg-rose-950 dark:text-rose-300"
+                            }
+                          >
+                            {isAvailable ? (
+                              <>
+                                <CheckCircle2 className="size-3.5" />
+                                Available
+                              </>
+                            ) : (
+                              <>
+                                <PackageX className="size-3.5" />
+                                Unavailable
+                              </>
+                            )}
+                          </Badge>
+                        </TableCell>
 
-                      <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground">
-                        <span>
-                          Brand:{" "}
-                          <strong className="text-foreground">
-                            {item.brand}
-                          </strong>
-                        </span>
-
-                        <span>
-                          Stock:{" "}
-                          <strong className="text-foreground">
-                            {item.stock}
-                          </strong>
-                        </span>
-
-                        <span className="flex items-center gap-1.5">
-                          <UserRound className="size-4" />
-                          {item.provider.name}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="rounded-2xl border bg-background px-5 py-4 lg:min-w-40 lg:text-right">
-                      <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                        Daily Price
-                      </p>
-
-                      <p className="mt-1 text-xl font-bold text-primary">
-                        ৳{formatCurrency(item.pricePerDay)}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+                        {/* Action */}
+                        <TableCell className="text-right">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            asChild
+                          >
+                            <Link
+                              href={`/gear/${item.id}`}
+                            >
+                              <Eye className="size-4" />
+                              View
+                            </Link>
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  },
+                )}
+              </TableBody>
+            </Table>
           )}
         </CardContent>
       </Card>
+
+      {/* Pagination */}
+      {filteredGear.length >
+        0 &&
+        totalPages > 1 && (
+          <div className="flex flex-col items-center justify-between gap-4 rounded-2xl border bg-card p-4 sm:flex-row">
+            <p className="text-sm text-muted-foreground">
+              Showing{" "}
+              {startIndex + 1}–
+              {Math.min(
+                startIndex +
+                  GEAR_PER_PAGE,
+                filteredGear.length,
+              )}{" "}
+              of{" "}
+              {
+                filteredGear.length
+              }{" "}
+              listings
+            </p>
+
+            <div className="flex items-center gap-2">
+              {/* Previous */}
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={
+                  safeCurrentPage ===
+                  1
+                }
+                asChild={
+                  safeCurrentPage !==
+                  1
+                }
+              >
+                {safeCurrentPage ===
+                1 ? (
+                  <>
+                    <ChevronLeft className="size-4" />
+                    Previous
+                  </>
+                ) : (
+                  <Link
+                    href={createPageUrl(
+                      {
+                        page:
+                          safeCurrentPage -
+                          1,
+                        search,
+                        category,
+                        status,
+                      },
+                    )}
+                  >
+                    <ChevronLeft className="size-4" />
+                    Previous
+                  </Link>
+                )}
+              </Button>
+
+              <Badge variant="outline">
+                Page{" "}
+                {safeCurrentPage}{" "}
+                of {totalPages}
+              </Badge>
+
+              {/* Next */}
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={
+                  safeCurrentPage ===
+                  totalPages
+                }
+                asChild={
+                  safeCurrentPage !==
+                  totalPages
+                }
+              >
+                {safeCurrentPage ===
+                totalPages ? (
+                  <>
+                    Next
+                    <ChevronRight className="size-4" />
+                  </>
+                ) : (
+                  <Link
+                    href={createPageUrl(
+                      {
+                        page:
+                          safeCurrentPage +
+                          1,
+                        search,
+                        category,
+                        status,
+                      },
+                    )}
+                  >
+                    Next
+                    <ChevronRight className="size-4" />
+                  </Link>
+                )}
+              </Button>
+            </div>
+          </div>
+        )}
     </div>
   );
 }

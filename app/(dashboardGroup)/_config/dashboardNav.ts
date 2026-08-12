@@ -6,10 +6,9 @@ import {
   CreditCard,
   LayoutDashboard,
   PackagePlus,
-  Settings,
-  ShieldCheck,
   Star,
   Tags,
+  UserRound,
   Users,
 } from "lucide-react";
 
@@ -41,9 +40,9 @@ export const customerNavItems: DashboardNavItem[] = [
     icon: Star,
   },
   {
-    title: "Settings",
-    href: "/customer-dashboard/settings",
-    icon: Settings,
+    title: "Profile",
+    href: "/profile",
+    icon: UserRound,
   },
 ];
 
@@ -74,9 +73,9 @@ export const providerNavItems: DashboardNavItem[] = [
     icon: BadgeDollarSign,
   },
   {
-    title: "Settings",
-    href: "/provider-dashboard/settings",
-    icon: Settings,
+    title: "Profile",
+    href: "/profile",
+    icon: UserRound,
   },
 ];
 
@@ -105,5 +104,10 @@ export const adminNavItems: DashboardNavItem[] = [
     title: "Rental Orders",
     href: "/admin-dashboard/rentals",
     icon: ClipboardList,
+  },
+  {
+    title: "Profile",
+    href: "/profile",
+    icon: UserRound,
   },
 ];

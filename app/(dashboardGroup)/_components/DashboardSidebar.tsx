@@ -6,18 +6,12 @@ import {
   providerNavItems,
   type DashboardNavItem,
 } from "@/app/(dashboardGroup)/_config/dashboardNav";
+
 import {
   Avatar,
   AvatarFallback,
 } from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
 import {
   Sidebar,
   SidebarContent,
@@ -31,26 +25,18 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { logout } from "@/service/logout";
+
 import type {
   AuthUser,
   UserRole,
 } from "@/types/auth";
+
 import {
-  ChevronsUpDown,
-  Home,
-  Loader2,
-  LogOut,
   Mountain,
-  UserRound,
 } from "lucide-react";
+
 import Link from "next/link";
-import {
-  usePathname,
-  useRouter,
-} from "next/navigation";
-import { useTransition } from "react";
-import { toast } from "sonner";
+import { usePathname } from "next/navigation";
 
 type DashboardSidebarProps = {
   user: AuthUser;
@@ -74,7 +60,9 @@ function getNavigationItems(
   }
 }
 
-function getRoleLabel(role: UserRole) {
+function getRoleLabel(
+  role: UserRole,
+) {
   switch (role) {
     case "CUSTOMER":
       return "Customer";
@@ -87,12 +75,16 @@ function getRoleLabel(role: UserRole) {
   }
 }
 
-function getUserInitials(name: string) {
+function getUserInitials(
+  name: string,
+) {
   return name
     .trim()
     .split(/\s+/)
     .slice(0, 2)
-    .map((part) => part.charAt(0).toUpperCase())
+    .map((part) =>
+      part.charAt(0).toUpperCase(),
+    )
     .join("");
 }
 
@@ -100,15 +92,13 @@ export function DashboardSidebar({
   user,
 }: DashboardSidebarProps) {
   const pathname = usePathname();
-  const router = useRouter();
-
-  const [isPending, startTransition] =
-    useTransition();
 
   const navigationItems =
     getNavigationItems(user.role);
 
-  function isActiveRoute(href: string) {
+  function isActiveRoute(
+    href: string,
+  ) {
     if (pathname === href) {
       return true;
     }
@@ -119,25 +109,6 @@ export function DashboardSidebar({
       href !== "/admin-dashboard" &&
       pathname.startsWith(`${href}/`)
     );
-  }
-
-  function handleLogout() {
-    startTransition(async () => {
-      const result = await logout();
-
-      if (!result.success) {
-        toast.error("Logout failed", {
-          description: result.message,
-        });
-
-        return;
-      }
-
-      toast.success("Logged out successfully");
-
-      router.replace("/login");
-      router.refresh();
-    });
   }
 
   return (
@@ -180,143 +151,77 @@ export function DashboardSidebar({
 
           <SidebarGroupContent>
             <SidebarMenu>
-              {navigationItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = isActiveRoute(
-                  item.href,
-                );
+              {navigationItems.map(
+                (item) => {
+                  const Icon =
+                    item.icon;
 
-                return (
-                  <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton
-                      tooltip={item.title}
-                      isActive={isActive}
-                      asChild
+                  const isActive =
+                    isActiveRoute(
+                      item.href,
+                    );
+
+                  return (
+                    <SidebarMenuItem
+                      key={
+                        item.href
+                      }
                     >
-                      <Link href={item.href}>
-                        <Icon className="size-4" />
+                      <SidebarMenuButton
+                        tooltip={
+                          item.title
+                        }
+                        isActive={
+                          isActive
+                        }
+                        asChild
+                      >
+                        <Link
+                          href={
+                            item.href
+                          }
+                        >
+                          <Icon className="size-4" />
 
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup className="mt-auto">
-          <SidebarGroupLabel>
-            Quick links
-          </SidebarGroupLabel>
-
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  tooltip="Browse Gear"
-                  asChild
-                >
-                  <Link href="/gear">
-                    <Home className="size-4" />
-
-                    <span>Browse Gear</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+                          <span>
+                            {
+                              item.title
+                            }
+                          </span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                },
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
 
-      {/* User account */}
+      {/* Logged-in user */}
       <SidebarFooter className="border-t">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuButton
-                  size="lg"
-                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                >
-                  <Avatar className="size-8 rounded-lg">
-                    <AvatarFallback className="rounded-lg bg-primary/10 text-sm font-semibold text-primary">
-                      {getUserInitials(user.name)}
-                    </AvatarFallback>
-                  </Avatar>
+        <div className="flex items-center gap-3 p-2">
+          <Avatar className="size-9 rounded-lg">
+            <AvatarFallback className="rounded-lg bg-primary/10 text-sm font-semibold text-primary">
+              {getUserInitials(
+                user.name,
+              )}
+            </AvatarFallback>
+          </Avatar>
 
-                  <span className="grid flex-1 text-left leading-tight">
-                    <span className="truncate font-medium">
-                      {user.name}
-                    </span>
+          <div className="grid min-w-0 flex-1 leading-tight group-data-[collapsible=icon]:hidden">
+            <span className="truncate text-sm font-medium">
+              {user.name}
+            </span>
 
-                    <span className="truncate text-xs text-muted-foreground">
-                      {user.email}
-                    </span>
-                  </span>
-
-                  <ChevronsUpDown className="ml-auto size-4" />
-                </SidebarMenuButton>
-              </DropdownMenuTrigger>
-
-              <DropdownMenuContent
-                side="right"
-                align="end"
-                sideOffset={8}
-                className="w-64"
-              >
-                <DropdownMenuLabel>
-                  <div className="space-y-1">
-                    <p className="font-medium">
-                      {user.name}
-                    </p>
-
-                    <p className="truncate text-xs font-normal text-muted-foreground">
-                      {user.email}
-                    </p>
-
-                    <p className="text-xs font-medium text-primary">
-                      {getRoleLabel(user.role)}
-                    </p>
-                  </div>
-                </DropdownMenuLabel>
-
-                <DropdownMenuSeparator />
-
-                <DropdownMenuItem asChild>
-                  <Link href="/">
-                    <Home className="size-4" />
-                    Return to Home
-                  </Link>
-                </DropdownMenuItem>
-
-                <DropdownMenuItem>
-                  <UserRound className="size-4" />
-                  Account Settings
-                </DropdownMenuItem>
-
-                <DropdownMenuSeparator />
-
-                <DropdownMenuItem
-                  variant="destructive"
-                  disabled={isPending}
-                  onClick={handleLogout}
-                >
-                  {isPending ? (
-                    <Loader2 className="size-4 animate-spin" />
-                  ) : (
-                    <LogOut className="size-4" />
-                  )}
-
-                  {isPending
-                    ? "Logging out..."
-                    : "Logout"}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </SidebarMenuItem>
-        </SidebarMenu>
+            <span className="truncate text-xs text-muted-foreground">
+              {getRoleLabel(
+                user.role,
+              )}
+            </span>
+          </div>
+        </div>
       </SidebarFooter>
 
       <SidebarRail />
