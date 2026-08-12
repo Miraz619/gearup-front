@@ -2,30 +2,34 @@ import type { GetMeResponse } from "@/types/auth";
 import { cookies } from "next/headers";
 
 export async function getMe() {
+  const backendUrl =
+    process.env.BACKEND_API_URL;
+
+  if (!backendUrl) {
+    return {
+      success: false,
+      message:
+        "Backend API URL is not configured",
+      data: null,
+    };
+  }
+
+  // IMPORTANT:
+  // Keep cookies() OUTSIDE try/catch
+  const cookieStore = await cookies();
+
+  const accessToken =
+    cookieStore.get("accessToken")?.value;
+
+  if (!accessToken) {
+    return {
+      success: false,
+      message: "You are not authenticated",
+      data: null,
+    };
+  }
+
   try {
-    const backendUrl = process.env.BACKEND_API_URL;
-
-    if (!backendUrl) {
-      return {
-        success: false,
-        message: "Backend API URL is not configured",
-        data: null,
-      };
-    }
-
-    const cookieStore = await cookies();
-
-    const accessToken =
-      cookieStore.get("accessToken")?.value;
-
-    if (!accessToken) {
-      return {
-        success: false,
-        message: "You are not authenticated",
-        data: null,
-      };
-    }
-
     const response = await fetch(
       `${backendUrl}/api/auth/me`,
       {
@@ -56,7 +60,10 @@ export async function getMe() {
       data: result.data,
     };
   } catch (error) {
-    console.error("Get current user error:", error);
+    console.error(
+      "Get current user error:",
+      error,
+    );
 
     return {
       success: false,
