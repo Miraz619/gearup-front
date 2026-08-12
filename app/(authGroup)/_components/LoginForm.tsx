@@ -16,13 +16,19 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import type { LoginUserPayload, UserRole } from "@/types/auth";
+import type {
+  LoginUserPayload,
+  UserRole,
+} from "@/types/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Eye,
   EyeOff,
   Loader2,
   LogIn,
+  ShieldCheck,
+  Store,
+  UserRound,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -30,6 +36,8 @@ import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+
+import { GoogleSignInButton } from "./GoogleSignInButton";
 
 const loginSchema = z.object({
   email: z
@@ -42,9 +50,40 @@ const loginSchema = z.object({
     .min(1, "Password is required"),
 });
 
-type LoginFormValues = z.infer<typeof loginSchema>;
+type LoginFormValues =
+  z.infer<typeof loginSchema>;
 
-function getDashboardPath(role: UserRole) {
+type DemoRole =
+  | "CUSTOMER"
+  | "PROVIDER"
+  | "ADMIN";
+
+const demoAccounts: Record<
+  DemoRole,
+  {
+    email: string;
+    password: string;
+  }
+> = {
+  CUSTOMER: {
+    email: "customer.demo@gearup.com",
+    password: "Demo12345!",
+  },
+
+  PROVIDER: {
+    email: "provider.demo@gearup.com",
+    password: "Demo12345!",
+  },
+
+  ADMIN: {
+    email: "miraz765@gmail.com",
+    password: "gearup431@#",
+  },
+};
+
+function getDashboardPath(
+  role: UserRole,
+) {
   switch (role) {
     case "ADMIN":
       return "/admin-dashboard";
@@ -63,47 +102,113 @@ function getDashboardPath(role: UserRole) {
 export function LoginForm() {
   const router = useRouter();
 
-  const [isPending, startTransition] = useTransition();
-  const [showPassword, setShowPassword] = useState(false);
+  const [
+    isPending,
+    startTransition,
+  ] = useTransition();
+
+  const [
+    showPassword,
+    setShowPassword,
+  ] = useState(false);
 
   const {
     register,
     handleSubmit,
+    setValue,
+    clearErrors,
     formState: { errors },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
+
     defaultValues: {
       email: "",
       password: "",
     },
   });
 
-  function onSubmit(values: LoginFormValues) {
+  function fillDemoAccount(
+    role: DemoRole,
+  ) {
+    const account =
+      demoAccounts[role];
+
+    setValue(
+      "email",
+      account.email,
+      {
+        shouldValidate: true,
+        shouldDirty: true,
+      },
+    );
+
+    setValue(
+      "password",
+      account.password,
+      {
+        shouldValidate: true,
+        shouldDirty: true,
+      },
+    );
+
+    clearErrors();
+
+    const roleName =
+      role.charAt(0) +
+      role.slice(1).toLowerCase();
+
+    toast.success(
+      `${roleName} demo selected`,
+      {
+        description:
+          "Demo credentials have been filled in.",
+      },
+    );
+  }
+
+  function onSubmit(
+    values: LoginFormValues,
+  ) {
     const payload: LoginUserPayload = {
       email: values.email,
       password: values.password,
     };
 
     startTransition(async () => {
-      const result = await loginUser(payload);
+      const result =
+        await loginUser(payload);
 
-      if (!result.success || !result.user) {
-        toast.error("Login failed", {
-          description: result.message,
-        });
+      if (
+        !result.success ||
+        !result.user
+      ) {
+        toast.error(
+          "Login failed",
+          {
+            description:
+              result.message,
+          },
+        );
 
         return;
       }
 
-      toast.success("Login successful", {
-        description: `Welcome back, ${result.user.name}.`,
-      });
-
-      const dashboardPath = getDashboardPath(
-        result.user.role,
+      toast.success(
+        "Login successful",
+        {
+          description: `Welcome back, ${result.user.name}.`,
+        },
       );
 
-      router.push(dashboardPath);
+      const dashboardPath =
+        getDashboardPath(
+          result.user.role,
+        );
+
+      router.push(
+        dashboardPath,
+      );
+
       router.refresh();
     });
   }
@@ -120,18 +225,27 @@ export function LoginForm() {
         </CardTitle>
 
         <CardDescription>
-          Log in to manage rentals, gear, and your GearUp
+          Log in to manage rentals,
+          gear, and your GearUp
           account.
         </CardDescription>
       </CardHeader>
 
       <CardContent>
+        {/* Normal login */}
         <form
-          onSubmit={handleSubmit(onSubmit)}
+          onSubmit={handleSubmit(
+            onSubmit,
+          )}
           noValidate
         >
           <FieldGroup>
-            <Field data-invalid={Boolean(errors.email)}>
+            {/* Email */}
+            <Field
+              data-invalid={Boolean(
+                errors.email,
+              )}
+            >
               <FieldLabel htmlFor="email">
                 Email address
               </FieldLabel>
@@ -141,7 +255,9 @@ export function LoginForm() {
                 type="email"
                 placeholder="you@example.com"
                 autoComplete="email"
-                aria-invalid={Boolean(errors.email)}
+                aria-invalid={Boolean(
+                  errors.email,
+                )}
                 disabled={isPending}
                 {...register("email")}
               />
@@ -151,7 +267,12 @@ export function LoginForm() {
               </FieldError>
             </Field>
 
-            <Field data-invalid={Boolean(errors.password)}>
+            {/* Password */}
+            <Field
+              data-invalid={Boolean(
+                errors.password,
+              )}
+            >
               <div className="flex items-center justify-between">
                 <FieldLabel htmlFor="password">
                   Password
@@ -168,13 +289,21 @@ export function LoginForm() {
               <div className="relative">
                 <Input
                   id="password"
-                  type={showPassword ? "text" : "password"}
+                  type={
+                    showPassword
+                      ? "text"
+                      : "password"
+                  }
                   placeholder="Enter your password"
                   autoComplete="current-password"
                   className="pr-10"
-                  aria-invalid={Boolean(errors.password)}
+                  aria-invalid={Boolean(
+                    errors.password,
+                  )}
                   disabled={isPending}
-                  {...register("password")}
+                  {...register(
+                    "password",
+                  )}
                 />
 
                 <Button
@@ -183,7 +312,10 @@ export function LoginForm() {
                   size="icon"
                   className="absolute right-0 top-0"
                   onClick={() =>
-                    setShowPassword((current) => !current)
+                    setShowPassword(
+                      (current) =>
+                        !current,
+                    )
                   }
                   aria-label={
                     showPassword
@@ -201,10 +333,14 @@ export function LoginForm() {
               </div>
 
               <FieldError>
-                {errors.password?.message}
+                {
+                  errors.password
+                    ?.message
+                }
               </FieldError>
             </Field>
 
+            {/* Login button */}
             <Button
               type="submit"
               size="lg"
@@ -226,6 +362,98 @@ export function LoginForm() {
           </FieldGroup>
         </form>
 
+        {/* Google divider */}
+        <div className="my-6 flex items-center gap-3">
+          <div className="h-px flex-1 bg-border" />
+
+          <span className="whitespace-nowrap text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            Or continue with
+          </span>
+
+          <div className="h-px flex-1 bg-border" />
+        </div>
+
+        {/* Google Sign-In */}
+        <GoogleSignInButton />
+
+        {/* Demo divider */}
+        <div className="my-6 flex items-center gap-3">
+          <div className="h-px flex-1 bg-border" />
+
+          <span className="whitespace-nowrap text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            Demo Login
+          </span>
+
+          <div className="h-px flex-1 bg-border" />
+        </div>
+
+        {/* Demo buttons */}
+        <div className="grid grid-cols-3 gap-2">
+          {/* Customer */}
+          <Button
+            type="button"
+            variant="outline"
+            className="h-auto flex-col gap-2 py-3"
+            disabled={isPending}
+            onClick={() =>
+              fillDemoAccount(
+                "CUSTOMER",
+              )
+            }
+          >
+            <UserRound className="size-4" />
+
+            <span className="text-xs">
+              Customer
+            </span>
+          </Button>
+
+          {/* Provider */}
+          <Button
+            type="button"
+            variant="outline"
+            className="h-auto flex-col gap-2 py-3"
+            disabled={isPending}
+            onClick={() =>
+              fillDemoAccount(
+                "PROVIDER",
+              )
+            }
+          >
+            <Store className="size-4" />
+
+            <span className="text-xs">
+              Provider
+            </span>
+          </Button>
+
+          {/* Admin */}
+          <Button
+            type="button"
+            variant="outline"
+            className="h-auto flex-col gap-2 py-3"
+            disabled={isPending}
+            onClick={() =>
+              fillDemoAccount(
+                "ADMIN",
+              )
+            }
+          >
+            <ShieldCheck className="size-4" />
+
+            <span className="text-xs">
+              Admin
+            </span>
+          </Button>
+        </div>
+
+        <p className="mt-3 text-center text-xs text-muted-foreground">
+          Select a role to autofill
+          demo credentials, then click
+          Login.
+        </p>
+
+        {/* Register */}
         <p className="mt-6 text-center text-sm text-muted-foreground">
           Do not have an account?{" "}
           <Link
