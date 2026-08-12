@@ -21,6 +21,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { RelatedGearSection } from "../../_components/RelatedGearSection";
 
 type GearDetailsPageProps = {
   params: Promise<{
@@ -355,6 +356,14 @@ export default async function GearDetailsPage({
             </div>
           )}
         </div>
+
+        <Separator className="my-12" />
+
+<RelatedGearSection
+  currentGearId={gear.id}
+  categoryId={gear.categoryId}
+  categoryName={categoryName}
+/>
       </div>
     </section>
   );
