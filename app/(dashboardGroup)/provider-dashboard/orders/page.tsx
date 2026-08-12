@@ -1,308 +1,66 @@
-// import { Badge } from "@/components/ui/badge";
-// import { OrderStatusUpdate } from "./_components/OrderStatusUpdate";
-// import {
-//   Card,
-//   CardContent,
-//   CardDescription,
-//   CardHeader,
-//   CardTitle,
-// } from "@/components/ui/card";
-// import { getProviderOrders } from "@/service/getProviderOrders";
-// import type { RentalStatus } from "@/types/rental";
-// import {
-//   CalendarDays,
-//   ClipboardList,
-//   Mail,
-//   Package,
-//   User,
-// } from "lucide-react";
-
-// const statusLabel: Record<RentalStatus, string> = {
-//   PLACED: "Placed",
-//   CONFIRMED: "Confirmed",
-//   PAID: "Paid",
-//   PICKED_UP: "Picked Up",
-//   RETURNED: "Returned",
-//   CANCELLED: "Cancelled",
-// };
-
-// const statusClassName: Record<RentalStatus, string> = {
-//   PLACED:
-//     "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-300",
-
-//   CONFIRMED:
-//     "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-900 dark:bg-blue-950 dark:text-blue-300",
-
-//   PAID:
-//     "border-green-200 bg-green-50 text-green-700 dark:border-green-900 dark:bg-green-950 dark:text-green-300",
-
-//   PICKED_UP:
-//     "border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-900 dark:bg-violet-950 dark:text-violet-300",
-
-//   RETURNED:
-//     "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300",
-
-//   CANCELLED:
-//     "border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300",
-// };
-
-// function formatDate(date: string) {
-//   return new Intl.DateTimeFormat("en-GB", {
-//     day: "2-digit",
-//     month: "short",
-//     year: "numeric",
-//   }).format(new Date(date));
-// }
-
-// export default async function ProviderOrdersPage() {
-//   const result = await getProviderOrders();
-//   const orders = result.data;
-
-//   return (
-//     <div className="space-y-6">
-//       <div>
-//         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-//           Rental Orders
-//         </h1>
-
-//         <p className="mt-1 text-sm text-muted-foreground">
-//           Review customer rental requests and manage their current
-//           status.
-//         </p>
-//       </div>
-
-//       <Card>
-//         <CardHeader className="flex flex-row items-center gap-4">
-//           <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
-//             <ClipboardList className="size-5" />
-//           </div>
-
-//           <div>
-//             <CardDescription>Total provider orders</CardDescription>
-
-//             <CardTitle className="text-2xl">
-//               {orders.length}
-//             </CardTitle>
-//           </div>
-//         </CardHeader>
-//       </Card>
-
-//       {orders.length === 0 ? (
-//         <Card>
-//           <CardContent className="flex min-h-80 flex-col items-center justify-center px-6 py-12 text-center">
-//             <div className="flex size-16 items-center justify-center rounded-full bg-primary/10 text-primary">
-//               <ClipboardList className="size-8" />
-//             </div>
-
-//             <h2 className="mt-5 text-xl font-semibold">
-//               No rental orders yet
-//             </h2>
-
-//             <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">
-//               Customer rental requests for your equipment will appear
-//               here.
-//             </p>
-//           </CardContent>
-//         </Card>
-//       ) : (
-//         <div className="space-y-5">
-//           {orders.map((order) => (
-//             <Card key={order.id}>
-//               <CardHeader>
-//                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-//                   <div>
-//                     <div className="flex flex-wrap items-center gap-2">
-//                       <CardTitle className="text-lg">
-//                         Order #{order.id.slice(0, 8)}
-//                       </CardTitle>
-
-//                       <Badge
-//                         variant="outline"
-//                         className={statusClassName[order.status]}
-//                       >
-//                         {statusLabel[order.status]}
-//                       </Badge>
-//                     </div>
-
-//                     <CardDescription className="mt-2">
-//                       Created on {formatDate(order.createdAt)}
-//                     </CardDescription>
-//                   </div>
-
-//                   <div className="text-left lg:text-right">
-//                     <p className="text-xs text-muted-foreground">
-//                       Total amount
-//                     </p>
-
-//                     <p className="mt-1 text-2xl font-bold text-primary">
-//                       ৳
-//                       {Number(
-//                         order.totalAmount,
-//                       ).toLocaleString()}
-//                     </p>
-//                   </div>
-//                 </div>
-//               </CardHeader>
-
-//               <CardContent className="space-y-6">
-//                 <div className="grid gap-4 rounded-xl border bg-muted/20 p-4 sm:grid-cols-2 xl:grid-cols-4">
-//                   <div className="flex gap-3">
-//                     <User className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-
-//                     <div className="min-w-0">
-//                       <p className="text-xs text-muted-foreground">
-//                         Customer
-//                       </p>
-
-//                       <p className="mt-1 truncate text-sm font-medium">
-//                         {order.customer.name}
-//                       </p>
-//                     </div>
-//                   </div>
-
-//                   <div className="flex gap-3">
-//                     <Mail className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-
-//                     <div className="min-w-0">
-//                       <p className="text-xs text-muted-foreground">
-//                         Email
-//                       </p>
-
-//                       <p className="mt-1 truncate text-sm font-medium">
-//                         {order.customer.email}
-//                       </p>
-//                     </div>
-//                   </div>
-
-//                   <div className="flex gap-3">
-//                     <CalendarDays className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-
-//                     <div>
-//                       <p className="text-xs text-muted-foreground">
-//                         Start date
-//                       </p>
-
-//                       <p className="mt-1 text-sm font-medium">
-//                         {formatDate(order.startDate)}
-//                       </p>
-//                     </div>
-//                   </div>
-
-//                   <div className="flex gap-3">
-//                     <CalendarDays className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-
-//                     <div>
-//                       <p className="text-xs text-muted-foreground">
-//                         End date
-//                       </p>
-
-//                       <p className="mt-1 text-sm font-medium">
-//                         {formatDate(order.endDate)}
-//                       </p>
-//                     </div>
-//                   </div>
-//                 </div>
-
-//                 <div>
-//                   <div className="flex items-center gap-2">
-//                     <Package className="size-4 text-primary" />
-
-//                     <h3 className="font-semibold">
-//                       Rented equipment
-//                     </h3>
-//                   </div>
-
-//                   <div className="mt-3 space-y-3">
-//                     {order.items.map((item) => (
-//                       <div
-//                         key={item.id}
-//                         className="flex flex-col gap-3 rounded-xl border p-4 sm:flex-row sm:items-center sm:justify-between"
-//                       >
-//                         <div className="min-w-0">
-//                           <p className="font-medium">
-//                             {item.gearItem.name}
-//                           </p>
-
-//                           <p className="mt-1 text-sm text-muted-foreground">
-//                             {item.gearItem.brand} · Quantity:{" "}
-//                             {item.quantity} · ৳
-//                             {Number(
-//                               item.pricePerDay,
-//                             ).toLocaleString()}
-//                             /day
-//                           </p>
-//                         </div>
-
-//                         <div className="shrink-0 sm:text-right">
-//                           <p className="text-xs text-muted-foreground">
-//                             Subtotal
-//                           </p>
-
-//                           <p className="mt-1 font-semibold">
-//                             ৳
-//                             {Number(
-//                               item.subtotal,
-//                             ).toLocaleString()}
-//                           </p>
-//                         </div>
-//                       </div>
-//                     ))}
-//                   </div>
-//                 </div>
-
-//                                 <div className="flex flex-col gap-3 border-t pt-5 sm:flex-row sm:items-center sm:justify-between">
-//                   <div>
-//                     <p className="text-sm font-medium">
-//                       Manage order status
-//                     </p>
-
-//                     <p className="mt-1 text-sm text-muted-foreground">
-//                       Update this rental according to its current stage.
-//                     </p>
-//                   </div>
-
-//                   <OrderStatusUpdate
-//                     orderId={order.id}
-//                     currentStatus={order.status}
-//                   />
-//                 </div>
-//               </CardContent>
-//             </Card>
-//           ))}
-//         </div>
-//       )}
-//     </div>
-//   );
-// }
-
-
-
 import { OrderStatusUpdate } from "./_components/OrderStatusUpdate";
+
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { getProviderOrders } from "@/service/getProviderOrders";
-import type {
-  ProviderRentalOrder,
-  RentalStatus,
-} from "@/types/rental";
+
+import { Input } from "@/components/ui/input";
+
 import {
-  CalendarDays,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
+import { getProviderOrders } from "@/service/getProviderOrders";
+
+import type { RentalStatus } from "@/types/rental";
+
+import {
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
   CircleDollarSign,
   ClipboardList,
   Clock3,
-  Mail,
-  Package,
-  UserRound,
+  Search,
+  X,
 } from "lucide-react";
 
-const statusLabel: Record<RentalStatus, string> = {
+import Link from "next/link";
+
+type ProviderOrdersPageProps = {
+  searchParams: Promise<{
+    search?: string;
+    status?: string;
+    page?: string;
+  }>;
+};
+
+const ORDERS_PER_PAGE = 6;
+
+const rentalStatuses: RentalStatus[] = [
+  "PLACED",
+  "CONFIRMED",
+  "PAID",
+  "PICKED_UP",
+  "RETURNED",
+  "CANCELLED",
+];
+
+const statusLabel: Record<
+  RentalStatus,
+  string
+> = {
   PLACED: "Placed",
   CONFIRMED: "Confirmed",
   PAID: "Paid",
@@ -311,352 +69,290 @@ const statusLabel: Record<RentalStatus, string> = {
   CANCELLED: "Cancelled",
 };
 
-const statusClassName: Record<RentalStatus, string> = {
+const statusClassName: Record<
+  RentalStatus,
+  string
+> = {
   PLACED:
     "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-300",
+
   CONFIRMED:
     "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-900 dark:bg-blue-950 dark:text-blue-300",
+
   PAID:
     "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300",
+
   PICKED_UP:
     "border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-900 dark:bg-violet-950 dark:text-violet-300",
+
   RETURNED:
     "border-teal-200 bg-teal-50 text-teal-700 dark:border-teal-900 dark:bg-teal-950 dark:text-teal-300",
+
   CANCELLED:
     "border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300",
 };
 
-function formatDate(date: string) {
-  return new Intl.DateTimeFormat("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  }).format(new Date(date));
+function formatDate(
+  value: string,
+) {
+  const date = new Date(value);
+
+  if (
+    Number.isNaN(
+      date.getTime(),
+    )
+  ) {
+    return "Unavailable";
+  }
+
+  return new Intl.DateTimeFormat(
+    "en-GB",
+    {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    },
+  ).format(date);
 }
 
-function formatCurrency(value: string | number) {
-  return Number(value).toLocaleString("en-BD", {
-    maximumFractionDigits: 2,
-  });
+function formatCurrency(
+  value: string | number,
+) {
+  return Number(value).toLocaleString(
+    "en-BD",
+    {
+      maximumFractionDigits: 2,
+    },
+  );
 }
 
-function getRentalDays(startDate: string, endDate: string) {
-  const start = new Date(startDate).getTime();
-  const end = new Date(endDate).getTime();
-  const oneDay = 1000 * 60 * 60 * 24;
-
-  return Math.max(1, Math.ceil((end - start) / oneDay));
-}
-
-function OrderCard({
-  order,
+function createPageUrl({
+  page,
+  search,
+  status,
 }: {
-  order: ProviderRentalOrder;
+  page: number;
+  search: string;
+  status: string;
 }) {
-  const totalAmount = Number(order.totalAmount);
-  const rentalDays = getRentalDays(
-    order.startDate,
-    order.endDate,
+  const params =
+    new URLSearchParams();
+
+  if (search) {
+    params.set(
+      "search",
+      search,
+    );
+  }
+
+  if (
+    status &&
+    status !== "ALL"
+  ) {
+    params.set(
+      "status",
+      status,
+    );
+  }
+
+  params.set(
+    "page",
+    page.toString(),
   );
 
-  return (
-    <Card
-  className={`overflow-hidden border-border/70 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${
-    order.status === "PLACED"
-      ? "border-l-4 border-l-amber-500"
-      : order.status === "CONFIRMED"
-        ? "border-l-4 border-l-blue-500"
-        : order.status === "PAID"
-          ? "border-l-4 border-l-emerald-500"
-          : order.status === "PICKED_UP"
-            ? "border-l-4 border-l-violet-500"
-            : order.status === "RETURNED"
-              ? "border-l-4 border-l-teal-500"
-              : "border-l-4 border-l-red-500"
-  }`}
->
-      <CardHeader
-  className={`border-b px-5 py-5 sm:px-6 ${
-    order.status === "PLACED"
-      ? "bg-amber-50/60 dark:bg-amber-950/20"
-      : order.status === "CONFIRMED"
-        ? "bg-blue-50/60 dark:bg-blue-950/20"
-        : order.status === "PAID"
-          ? "bg-emerald-50/60 dark:bg-emerald-950/20"
-          : order.status === "PICKED_UP"
-            ? "bg-violet-50/60 dark:bg-violet-950/20"
-            : order.status === "RETURNED"
-              ? "bg-teal-50/60 dark:bg-teal-950/20"
-              : "bg-red-50/60 dark:bg-red-950/20"
-  }`}
->
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex items-start gap-4">
-            <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-              <ClipboardList className="size-5" />
-            </div>
-
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <CardTitle className="text-lg">
-                  Order #{order.id.slice(0, 8).toUpperCase()}
-                </CardTitle>
-
-                <Badge
-                  variant="outline"
-                  className={statusClassName[order.status]}
-                >
-                  {statusLabel[order.status]}
-                </Badge>
-              </div>
-
-              <CardDescription className="mt-1.5">
-                Placed on {formatDate(order.createdAt)}
-              </CardDescription>
-            </div>
-          </div>
-
-          <div className="rounded-xl border bg-background px-4 py-3 lg:min-w-44 lg:text-right">
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Order total
-            </p>
-
-            <p
-              className={`mt-1 text-2xl font-bold ${
-                totalAmount < 0
-                  ? "text-destructive"
-                  : "text-primary"
-              }`}
-            >
-              ৳{formatCurrency(order.totalAmount)}
-            </p>
-          </div>
-        </div>
-      </CardHeader>
-
-      <CardContent className="space-y-6 p-5 sm:p-6">
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <div className="rounded-xl border bg-card p-4">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <UserRound className="size-4" />
-              <span className="text-xs font-medium uppercase tracking-wide">
-                Customer
-              </span>
-            </div>
-
-            <p className="mt-2 truncate font-semibold">
-              {order.customer.name}
-            </p>
-
-            <div className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
-              <Mail className="size-3.5" />
-              <span className="truncate">
-                {order.customer.email}
-              </span>
-            </div>
-          </div>
-
-          <div className="rounded-xl border bg-card p-4">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <CalendarDays className="size-4" />
-              <span className="text-xs font-medium uppercase tracking-wide">
-                Rental period
-              </span>
-            </div>
-
-            <p className="mt-2 font-semibold">
-              {formatDate(order.startDate)}
-            </p>
-
-            <p className="mt-1 text-sm text-muted-foreground">
-              to {formatDate(order.endDate)}
-            </p>
-          </div>
-
-          <div className="rounded-xl border bg-card p-4">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Clock3 className="size-4" />
-              <span className="text-xs font-medium uppercase tracking-wide">
-                Duration
-              </span>
-            </div>
-
-            <p className="mt-2 font-semibold">
-              {rentalDays}{" "}
-              {rentalDays === 1 ? "day" : "days"}
-            </p>
-
-            <p className="mt-1 text-sm text-muted-foreground">
-              Complete rental period
-            </p>
-          </div>
-
-          <div className="rounded-xl border bg-card p-4">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Package className="size-4" />
-              <span className="text-xs font-medium uppercase tracking-wide">
-                Equipment
-              </span>
-            </div>
-
-            <p className="mt-2 font-semibold">
-              {order.items.length}{" "}
-              {order.items.length === 1 ? "item" : "items"}
-            </p>
-
-            <p className="mt-1 text-sm text-muted-foreground">
-              {order.items.reduce(
-                (total, item) => total + item.quantity,
-                0,
-              )}{" "}
-              total units
-            </p>
-          </div>
-        </div>
-
-        <div>
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <div>
-              <h3 className="font-semibold">
-                Rented equipment
-              </h3>
-
-              <p className="mt-1 text-sm text-muted-foreground">
-                Equipment included in this rental order.
-              </p>
-            </div>
-          </div>
-
-          <div className="overflow-hidden rounded-xl border">
-            <div className="hidden grid-cols-[minmax(0,1fr)_100px_120px_120px] gap-4 border-b bg-muted/40 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground md:grid">
-              <span>Equipment</span>
-              <span className="text-center">Quantity</span>
-              <span className="text-right">Daily price</span>
-              <span className="text-right">Subtotal</span>
-            </div>
-
-            <div className="divide-y">
-              {order.items.map((item) => (
-                <div
-                  key={item.id}
-                  className="grid gap-4 px-4 py-4 md:grid-cols-[minmax(0,1fr)_100px_120px_120px] md:items-center"
-                >
-                  <div className="min-w-0">
-                    <p className="truncate font-medium">
-                      {item.gearItem.name}
-                    </p>
-
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {item.gearItem.brand}
-                    </p>
-                  </div>
-
-                  <div className="flex items-center justify-between md:block md:text-center">
-                    <span className="text-sm text-muted-foreground md:hidden">
-                      Quantity
-                    </span>
-
-                    <Badge variant="secondary">
-                      {item.quantity}
-                    </Badge>
-                  </div>
-
-                  <div className="flex items-center justify-between md:block md:text-right">
-                    <span className="text-sm text-muted-foreground md:hidden">
-                      Daily price
-                    </span>
-
-                    <span className="font-medium">
-                      ৳{formatCurrency(item.pricePerDay)}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between md:block md:text-right">
-                    <span className="text-sm text-muted-foreground md:hidden">
-                      Subtotal
-                    </span>
-
-                    <span className="font-semibold">
-                      ৳{formatCurrency(item.subtotal)}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-4 rounded-xl border bg-muted/20 p-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="font-semibold">
-              Manage order status
-            </p>
-
-            <p className="mt-1 text-sm text-muted-foreground">
-              Move this order to its next valid rental stage.
-            </p>
-          </div>
-
-          <OrderStatusUpdate
-            orderId={order.id}
-            currentStatus={order.status}
-          />
-        </div>
-      </CardContent>
-    </Card>
-  );
+  return `/provider-dashboard/orders?${params.toString()}`;
 }
 
-export default async function ProviderOrdersPage() {
-  const result = await getProviderOrders();
+export default async function ProviderOrdersPage({
+  searchParams,
+}: ProviderOrdersPageProps) {
+  const params =
+    await searchParams;
+
+  const result =
+    await getProviderOrders();
+
   const orders = result.data;
 
-  const activeOrders = orders.filter((order) =>
-    [
-      "PLACED",
-      "CONFIRMED",
-      "PAID",
-      "PICKED_UP",
-    ].includes(order.status),
-  ).length;
+  const search =
+    params.search?.trim() ||
+    "";
 
-  const completedOrders = orders.filter(
-    (order) => order.status === "RETURNED",
-  ).length;
+  const status =
+    params.status || "ALL";
 
-  const confirmedRevenue = orders
-    .filter((order) =>
-      ["PAID", "PICKED_UP", "RETURNED"].includes(
-        order.status,
-      ),
-    )
-    .reduce(
-      (total, order) =>
-        total + Math.max(0, Number(order.totalAmount)),
-      0,
+  const requestedPage =
+    Number(
+      params.page || "1",
     );
 
+  const currentPage =
+    Number.isInteger(
+      requestedPage,
+    ) &&
+    requestedPage > 0
+      ? requestedPage
+      : 1;
+
+  /*
+   * Dashboard statistics
+   */
+
+  const activeOrders =
+    orders.filter(
+      (order) =>
+        [
+          "PLACED",
+          "CONFIRMED",
+          "PAID",
+          "PICKED_UP",
+        ].includes(
+          order.status,
+        ),
+    ).length;
+
+  const completedOrders =
+    orders.filter(
+      (order) =>
+        order.status ===
+        "RETURNED",
+    ).length;
+
+  const confirmedRevenue =
+    orders
+      .filter((order) =>
+        [
+          "PAID",
+          "PICKED_UP",
+          "RETURNED",
+        ].includes(
+          order.status,
+        ),
+      )
+      .reduce(
+        (
+          total,
+          order,
+        ) =>
+          total +
+          Math.max(
+            0,
+            Number(
+              order.totalAmount,
+            ),
+          ),
+        0,
+      );
+
+  /*
+   * Search and filtering
+   */
+
+  const filteredOrders =
+    orders.filter((order) => {
+      const normalizedSearch =
+        search.toLowerCase();
+
+      const matchesSearch =
+        !normalizedSearch ||
+        order.id
+          .toLowerCase()
+          .includes(
+            normalizedSearch,
+          ) ||
+        order.customer.name
+          .toLowerCase()
+          .includes(
+            normalizedSearch,
+          ) ||
+        order.customer.email
+          .toLowerCase()
+          .includes(
+            normalizedSearch,
+          ) ||
+        order.items.some(
+          (item) =>
+            item.gearItem.name
+              .toLowerCase()
+              .includes(
+                normalizedSearch,
+              ) ||
+            item.gearItem.brand
+              .toLowerCase()
+              .includes(
+                normalizedSearch,
+              ),
+        );
+
+      const matchesStatus =
+        status === "ALL" ||
+        order.status === status;
+
+      return (
+        matchesSearch &&
+        matchesStatus
+      );
+    });
+
+  /*
+   * Pagination
+   */
+
+  const totalPages =
+    Math.max(
+      1,
+      Math.ceil(
+        filteredOrders.length /
+          ORDERS_PER_PAGE,
+      ),
+    );
+
+  const safeCurrentPage =
+    Math.min(
+      currentPage,
+      totalPages,
+    );
+
+  const startIndex =
+    (safeCurrentPage - 1) *
+    ORDERS_PER_PAGE;
+
+  const paginatedOrders =
+    filteredOrders.slice(
+      startIndex,
+      startIndex +
+        ORDERS_PER_PAGE,
+    );
+
+  const hasFilters =
+    Boolean(search) ||
+    status !== "ALL";
+
   return (
-    <div className="space-y-7">
-      <div className="flex flex-col gap-2">
-        <Badge
-          variant="secondary"
-          className="w-fit"
-        >
+    <div className="space-y-8">
+      {/* Heading */}
+      <section className="rounded-3xl border bg-card px-6 py-8 shadow-sm sm:px-8">
+        <Badge variant="secondary">
+          <ClipboardList className="size-3.5" />
           Provider Management
         </Badge>
 
-        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+        <h1 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
           Rental Orders
         </h1>
 
-        <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
-          Review customer bookings, inspect rented equipment,
-          and manage each order through its rental lifecycle.
+        <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
+          Review customer
+          bookings, inspect rented
+          equipment and manage each
+          order through its rental
+          lifecycle.
         </p>
-      </div>
+      </section>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      {/* Statistics */}
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {/* Total */}
         <Card>
           <CardContent className="flex items-center gap-4 p-5">
             <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -665,7 +361,7 @@ export default async function ProviderOrdersPage() {
 
             <div>
               <p className="text-sm text-muted-foreground">
-                Total orders
+                Total Orders
               </p>
 
               <p className="mt-1 text-2xl font-bold">
@@ -675,6 +371,7 @@ export default async function ProviderOrdersPage() {
           </CardContent>
         </Card>
 
+        {/* Active */}
         <Card>
           <CardContent className="flex items-center gap-4 p-5">
             <div className="flex size-11 items-center justify-center rounded-xl bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300">
@@ -683,7 +380,7 @@ export default async function ProviderOrdersPage() {
 
             <div>
               <p className="text-sm text-muted-foreground">
-                Active orders
+                Active Orders
               </p>
 
               <p className="mt-1 text-2xl font-bold">
@@ -693,6 +390,7 @@ export default async function ProviderOrdersPage() {
           </CardContent>
         </Card>
 
+        {/* Completed */}
         <Card>
           <CardContent className="flex items-center gap-4 p-5">
             <div className="flex size-11 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
@@ -711,6 +409,7 @@ export default async function ProviderOrdersPage() {
           </CardContent>
         </Card>
 
+        {/* Revenue */}
         <Card>
           <CardContent className="flex items-center gap-4 p-5">
             <div className="flex size-11 items-center justify-center rounded-xl bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
@@ -719,44 +418,464 @@ export default async function ProviderOrdersPage() {
 
             <div className="min-w-0">
               <p className="text-sm text-muted-foreground">
-                Confirmed revenue
+                Confirmed Revenue
               </p>
 
               <p className="mt-1 truncate text-2xl font-bold">
-                ৳{formatCurrency(confirmedRevenue)}
+                ৳
+                {formatCurrency(
+                  confirmedRevenue,
+                )}
               </p>
             </div>
           </CardContent>
         </Card>
-      </div>
+      </section>
 
-      {orders.length === 0 ? (
-        <Card>
-          <CardContent className="flex min-h-96 flex-col items-center justify-center px-6 py-12 text-center">
-            <div className="flex size-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-              <ClipboardList className="size-8" />
+      {/* Search and filter */}
+      <Card>
+        <CardHeader className="border-b">
+          <CardTitle>
+            Search and Filter Orders
+          </CardTitle>
+        </CardHeader>
+
+        <CardContent className="p-5">
+          <form
+            action="/provider-dashboard/orders"
+            method="GET"
+            className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px_auto]"
+          >
+            {/* Search */}
+            <div className="relative">
+              <label
+                htmlFor="provider-order-search"
+                className="sr-only"
+              >
+                Search orders
+              </label>
+
+              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+
+              <Input
+                id="provider-order-search"
+                name="search"
+                defaultValue={
+                  search
+                }
+                placeholder="Search order, customer or gear"
+                className="pl-9"
+              />
             </div>
 
-            <h2 className="mt-5 text-xl font-semibold">
-              No rental orders yet
-            </h2>
+            {/* Status */}
+            <div>
+              <label
+                htmlFor="provider-order-status"
+                className="sr-only"
+              >
+                Filter by status
+              </label>
 
-            <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">
-              New customer bookings for your equipment will
-              appear here automatically.
+              <select
+                id="provider-order-status"
+                name="status"
+                defaultValue={
+                  status
+                }
+                className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              >
+                <option value="ALL">
+                  All statuses
+                </option>
+
+                {rentalStatuses.map(
+                  (
+                    rentalStatus,
+                  ) => (
+                    <option
+                      key={
+                        rentalStatus
+                      }
+                      value={
+                        rentalStatus
+                      }
+                    >
+                      {
+                        statusLabel[
+                          rentalStatus
+                        ]
+                      }
+                    </option>
+                  ),
+                )}
+              </select>
+            </div>
+
+            {/* Buttons */}
+            <div className="flex gap-2">
+              <Button type="submit">
+                <Search className="size-4" />
+                Apply
+              </Button>
+
+              {hasFilters && (
+                <Button
+                  variant="outline"
+                  asChild
+                >
+                  <Link href="/provider-dashboard/orders">
+                    <X className="size-4" />
+                    Clear
+                  </Link>
+                </Button>
+              )}
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+
+      {/* Orders table */}
+      <Card className="overflow-hidden">
+        <CardHeader className="border-b">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <CardTitle>
+              Customer Rental Orders
+            </CardTitle>
+
+            <Badge variant="secondary">
+              {filteredOrders.length}{" "}
+              {filteredOrders.length ===
+              1
+                ? "result"
+                : "results"}
+            </Badge>
+          </div>
+        </CardHeader>
+
+        <CardContent className="p-0">
+          {paginatedOrders.length ===
+          0 ? (
+            /* Empty state */
+            <div className="flex min-h-80 flex-col items-center justify-center px-6 py-12 text-center">
+              <div className="flex size-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <ClipboardList className="size-8" />
+              </div>
+
+              <h2 className="mt-5 text-xl font-semibold">
+                {hasFilters
+                  ? "No matching orders found"
+                  : "No rental orders yet"}
+              </h2>
+
+              <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">
+                {hasFilters
+                  ? "Try changing your search text or selected status."
+                  : "New customer bookings for your equipment will appear here automatically."}
+              </p>
+
+              {hasFilters && (
+                <Button
+                  variant="outline"
+                  className="mt-5"
+                  asChild
+                >
+                  <Link href="/provider-dashboard/orders">
+                    <X className="size-4" />
+                    Clear Filters
+                  </Link>
+                </Button>
+              )}
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="min-w-[130px]">
+                    Order
+                  </TableHead>
+
+                  <TableHead className="min-w-[200px]">
+                    Customer
+                  </TableHead>
+
+                  <TableHead className="min-w-[190px]">
+                    Rental Period
+                  </TableHead>
+
+                  <TableHead>
+                    Equipment
+                  </TableHead>
+
+                  <TableHead>
+                    Status
+                  </TableHead>
+
+                  <TableHead className="text-right">
+                    Total
+                  </TableHead>
+
+                  <TableHead className="min-w-[220px] text-right">
+                    Update Status
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+
+              <TableBody>
+                {paginatedOrders.map(
+                  (order) => {
+                    const totalUnits =
+                      order.items.reduce(
+                        (
+                          total,
+                          item,
+                        ) =>
+                          total +
+                          item.quantity,
+                        0,
+                      );
+
+                    return (
+                      <TableRow
+                        key={
+                          order.id
+                        }
+                      >
+                        {/* Order */}
+                        <TableCell>
+                          <div>
+                            <p className="font-medium">
+                              #
+                              {order.id
+                                .slice(
+                                  0,
+                                  8,
+                                )
+                                .toUpperCase()}
+                            </p>
+
+                            <p className="mt-1 text-xs text-muted-foreground">
+                              {formatDate(
+                                order.createdAt,
+                              )}
+                            </p>
+                          </div>
+                        </TableCell>
+
+                        {/* Customer */}
+                        <TableCell>
+                          <div>
+                            <p className="font-medium">
+                              {
+                                order
+                                  .customer
+                                  .name
+                              }
+                            </p>
+
+                            <p className="max-w-[200px] truncate text-xs text-muted-foreground">
+                              {
+                                order
+                                  .customer
+                                  .email
+                              }
+                            </p>
+                          </div>
+                        </TableCell>
+
+                        {/* Period */}
+                        <TableCell>
+                          <p className="text-sm">
+                            {formatDate(
+                              order.startDate,
+                            )}
+                          </p>
+
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            to{" "}
+                            {formatDate(
+                              order.endDate,
+                            )}
+                          </p>
+                        </TableCell>
+
+                        {/* Equipment */}
+                        <TableCell>
+                          <div>
+                            <p className="font-medium">
+                              {
+                                order.items
+                                  .length
+                              }{" "}
+                              {order.items
+                                .length ===
+                              1
+                                ? "item"
+                                : "items"}
+                            </p>
+
+                            <p className="text-xs text-muted-foreground">
+                              {totalUnits}{" "}
+                              {totalUnits ===
+                              1
+                                ? "unit"
+                                : "units"}
+                            </p>
+                          </div>
+                        </TableCell>
+
+                        {/* Status */}
+                        <TableCell>
+                          <Badge
+                            variant="outline"
+                            className={
+                              statusClassName[
+                                order.status
+                              ]
+                            }
+                          >
+                            {
+                              statusLabel[
+                                order.status
+                              ]
+                            }
+                          </Badge>
+                        </TableCell>
+
+                        {/* Total */}
+                        <TableCell className="text-right font-semibold">
+                          ৳
+                          {formatCurrency(
+                            order.totalAmount,
+                          )}
+                        </TableCell>
+
+                        {/* Status action */}
+                        <TableCell>
+                          <div className="flex justify-end">
+                            <OrderStatusUpdate
+                              orderId={
+                                order.id
+                              }
+                              currentStatus={
+                                order.status
+                              }
+                            />
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  },
+                )}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Pagination */}
+      {filteredOrders.length >
+        0 &&
+        totalPages > 1 && (
+          <div className="flex flex-col items-center justify-between gap-4 rounded-2xl border bg-card p-4 sm:flex-row">
+            <p className="text-sm text-muted-foreground">
+              Showing{" "}
+              {startIndex + 1}–
+              {Math.min(
+                startIndex +
+                  ORDERS_PER_PAGE,
+                filteredOrders.length,
+              )}{" "}
+              of{" "}
+              {
+                filteredOrders.length
+              }{" "}
+              orders
             </p>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="space-y-6">
-          {orders.map((order) => (
-            <OrderCard
-              key={order.id}
-              order={order}
-            />
-          ))}
-        </div>
-      )}
+
+            <div className="flex items-center gap-2">
+              {/* Previous */}
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={
+                  safeCurrentPage ===
+                  1
+                }
+                asChild={
+                  safeCurrentPage !==
+                  1
+                }
+              >
+                {safeCurrentPage ===
+                1 ? (
+                  <>
+                    <ChevronLeft className="size-4" />
+                    Previous
+                  </>
+                ) : (
+                  <Link
+                    href={createPageUrl(
+                      {
+                        page:
+                          safeCurrentPage -
+                          1,
+                        search,
+                        status,
+                      },
+                    )}
+                  >
+                    <ChevronLeft className="size-4" />
+                    Previous
+                  </Link>
+                )}
+              </Button>
+
+              <Badge variant="outline">
+                Page{" "}
+                {safeCurrentPage}{" "}
+                of {totalPages}
+              </Badge>
+
+              {/* Next */}
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={
+                  safeCurrentPage ===
+                  totalPages
+                }
+                asChild={
+                  safeCurrentPage !==
+                  totalPages
+                }
+              >
+                {safeCurrentPage ===
+                totalPages ? (
+                  <>
+                    Next
+                    <ChevronRight className="size-4" />
+                  </>
+                ) : (
+                  <Link
+                    href={createPageUrl(
+                      {
+                        page:
+                          safeCurrentPage +
+                          1,
+                        search,
+                        status,
+                      },
+                    )}
+                  >
+                    Next
+                    <ChevronRight className="size-4" />
+                  </Link>
+                )}
+              </Button>
+            </div>
+          </div>
+        )}
     </div>
   );
 }

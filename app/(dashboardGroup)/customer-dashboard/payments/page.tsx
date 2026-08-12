@@ -1,25 +1,59 @@
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+
+import { Input } from "@/components/ui/input";
+
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
 import { getMyPayments } from "@/service/getMypayment";
 
 import type {
-  CustomerPayment,
   PaymentStatus,
 } from "@/types/payment";
+
 import {
-  CalendarDays,
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
   CreditCard,
   Package,
   Receipt,
-  ShieldCheck,
+  Search,
   WalletCards,
+  X,
 } from "lucide-react";
+
+import Link from "next/link";
+
+type CustomerPaymentsPageProps = {
+  searchParams: Promise<{
+    search?: string;
+    status?: string;
+    page?: string;
+  }>;
+};
+
+const PAYMENTS_PER_PAGE = 6;
+
+const paymentStatuses: PaymentStatus[] = [
+  "PENDING",
+  "COMPLETED",
+  "FAILED",
+];
 
 const paymentStatusLabel: Record<
   PaymentStatus,
@@ -35,250 +69,252 @@ const paymentStatusClassName: Record<
   string
 > = {
   PENDING:
-    "border-amber-300 bg-amber-100 text-amber-800 dark:border-amber-800 dark:bg-amber-950/60 dark:text-amber-300",
+    "border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300",
+
   COMPLETED:
-    "border-emerald-300 bg-emerald-100 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300",
+    "border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-300",
+
   FAILED:
-    "border-rose-300 bg-rose-100 text-rose-800 dark:border-rose-800 dark:bg-rose-950/60 dark:text-rose-300",
+    "border-rose-300 bg-rose-50 text-rose-700 dark:border-rose-800 dark:bg-rose-950 dark:text-rose-300",
 };
 
-function formatDate(date: string | null) {
+function formatDate(
+  date: string | null,
+) {
   if (!date) {
     return "Not available";
   }
 
-  return new Intl.DateTimeFormat("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(date));
+  const value = new Date(date);
+
+  if (
+    Number.isNaN(
+      value.getTime(),
+    )
+  ) {
+    return "Not available";
+  }
+
+  return new Intl.DateTimeFormat(
+    "en-GB",
+    {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    },
+  ).format(value);
 }
 
-function formatCurrency(value: string | number) {
-  return Number(value).toLocaleString("en-BD", {
-    maximumFractionDigits: 2,
-  });
+function formatCurrency(
+  value: string | number,
+) {
+  return Number(value).toLocaleString(
+    "en-BD",
+    {
+      maximumFractionDigits: 2,
+    },
+  );
 }
 
-function PaymentCard({
-  payment,
+function createPageUrl({
+  page,
+  search,
+  status,
 }: {
-  payment: CustomerPayment;
+  page: number;
+  search: string;
+  status: string;
 }) {
-  const totalUnits =
-    payment.rentalOrder.items.reduce(
-      (total, item) => total + item.quantity,
+  const params =
+    new URLSearchParams();
+
+  if (search) {
+    params.set(
+      "search",
+      search,
+    );
+  }
+
+  if (
+    status &&
+    status !== "ALL"
+  ) {
+    params.set(
+      "status",
+      status,
+    );
+  }
+
+  params.set(
+    "page",
+    page.toString(),
+  );
+
+  return `/customer-dashboard/payments?${params.toString()}`;
+}
+
+export default async function CustomerPaymentsPage({
+  searchParams,
+}: CustomerPaymentsPageProps) {
+  const params =
+    await searchParams;
+
+  const result =
+    await getMyPayments();
+
+  const payments =
+    result.data;
+
+  const search =
+    params.search?.trim() ||
+    "";
+
+  const status =
+    params.status || "ALL";
+
+  const requestedPage =
+    Number(
+      params.page || "1",
+    );
+
+  const currentPage =
+    Number.isInteger(
+      requestedPage,
+    ) &&
+    requestedPage > 0
+      ? requestedPage
+      : 1;
+
+  /*
+   * Statistics
+   */
+
+  const completedPayments =
+    payments.filter(
+      (payment) =>
+        payment.status ===
+        "COMPLETED",
+    );
+
+  const pendingPayments =
+    payments.filter(
+      (payment) =>
+        payment.status ===
+        "PENDING",
+    ).length;
+
+  const totalPaid =
+    completedPayments.reduce(
+      (
+        total,
+        payment,
+      ) =>
+        total +
+        Number(
+          payment.amount,
+        ),
       0,
     );
 
-  return (
-    <Card className="group overflow-hidden border-emerald-200/80 bg-gradient-to-br from-emerald-50 via-white to-cyan-50 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-emerald-900 dark:from-emerald-950/20 dark:via-card dark:to-cyan-950/10">
-      <CardHeader className="border-b border-emerald-200/60 bg-gradient-to-r from-emerald-100/70 to-cyan-100/50 px-5 py-5 dark:border-emerald-900 dark:from-emerald-950/30 dark:to-cyan-950/20 sm:px-6">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex items-start gap-4">
-            <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-md transition-transform group-hover:scale-105">
-              <Receipt className="size-5" />
-            </div>
+  const totalItems =
+    payments.reduce(
+      (
+        total,
+        payment,
+      ) =>
+        total +
+        payment.rentalOrder.items.reduce(
+          (
+            itemTotal,
+            item,
+          ) =>
+            itemTotal +
+            item.quantity,
+          0,
+        ),
+      0,
+    );
 
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <CardTitle className="text-lg sm:text-xl">
-                  Payment #
-                  {payment.id.slice(0, 8).toUpperCase()}
-                </CardTitle>
+  /*
+   * Search and filtering
+   */
 
-                <Badge
-                  variant="outline"
-                  className={
-                    paymentStatusClassName[payment.status]
-                  }
-                >
-                  {paymentStatusLabel[payment.status]}
-                </Badge>
-              </div>
+  const filteredPayments =
+    payments.filter(
+      (payment) => {
+        const normalizedSearch =
+          search.toLowerCase();
 
-              <p className="mt-2 break-all text-sm text-muted-foreground">
-                Transaction: {payment.transactionId}
-              </p>
-            </div>
-          </div>
+        const matchesSearch =
+          !normalizedSearch ||
+          payment.id
+            .toLowerCase()
+            .includes(
+              normalizedSearch,
+            ) ||
+          payment.transactionId
+            .toLowerCase()
+            .includes(
+              normalizedSearch,
+            ) ||
+          payment.rentalOrderId
+            .toLowerCase()
+            .includes(
+              normalizedSearch,
+            );
 
-          <div className="rounded-2xl border border-emerald-200 bg-white/80 px-5 py-4 shadow-sm backdrop-blur dark:border-emerald-900 dark:bg-card/80 lg:min-w-48 lg:text-right">
-            <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-              Amount paid
-            </p>
+        const matchesStatus =
+          status === "ALL" ||
+          payment.status ===
+            status;
 
-            <p className="mt-1 text-2xl font-bold text-emerald-700 dark:text-emerald-400">
-              ৳{formatCurrency(payment.amount)}
-            </p>
-          </div>
-        </div>
-      </CardHeader>
+        return (
+          matchesSearch &&
+          matchesStatus
+        );
+      },
+    );
 
-      <CardContent className="space-y-6 p-5 sm:p-6">
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <div className="rounded-2xl border border-blue-200 bg-gradient-to-br from-blue-100 to-cyan-50 p-4 shadow-sm dark:border-blue-900 dark:from-blue-950/40 dark:to-cyan-950/20">
-            <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
-              <WalletCards className="size-4" />
+  /*
+   * Pagination
+   */
 
-              <span className="text-xs font-bold uppercase tracking-wide">
-                Method
-              </span>
-            </div>
-
-            <p className="mt-3 font-semibold">
-              {payment.method}
-            </p>
-          </div>
-
-          <div className="rounded-2xl border border-violet-200 bg-gradient-to-br from-violet-100 to-fuchsia-50 p-4 shadow-sm dark:border-violet-900 dark:from-violet-950/40 dark:to-fuchsia-950/20">
-            <div className="flex items-center gap-2 text-violet-700 dark:text-violet-300">
-              <CalendarDays className="size-4" />
-
-              <span className="text-xs font-bold uppercase tracking-wide">
-                Paid at
-              </span>
-            </div>
-
-            <p className="mt-3 text-sm font-semibold">
-              {formatDate(payment.paidAt)}
-            </p>
-          </div>
-
-          <div className="rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-100 to-orange-50 p-4 shadow-sm dark:border-amber-900 dark:from-amber-950/40 dark:to-orange-950/20">
-            <div className="flex items-center gap-2 text-amber-700 dark:text-amber-300">
-              <Package className="size-4" />
-
-              <span className="text-xs font-bold uppercase tracking-wide">
-                Equipment
-              </span>
-            </div>
-
-            <p className="mt-3 font-semibold">
-              {totalUnits}{" "}
-              {totalUnits === 1 ? "unit" : "units"}
-            </p>
-          </div>
-
-          <div className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-100 to-green-50 p-4 shadow-sm dark:border-emerald-900 dark:from-emerald-950/40 dark:to-green-950/20">
-            <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-300">
-              <ShieldCheck className="size-4" />
-
-              <span className="text-xs font-bold uppercase tracking-wide">
-                Rental status
-              </span>
-            </div>
-
-            <p className="mt-3 font-semibold">
-              {payment.rentalOrder.status.replace(
-                "_",
-                " ",
-              )}
-            </p>
-          </div>
-        </div>
-
-        <div className="rounded-2xl border border-primary/15 bg-white/70 p-5 shadow-sm backdrop-blur dark:bg-card/70">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">
-                Rental order
-              </p>
-
-              <p className="mt-1 font-semibold">
-                #
-                {payment.rentalOrderId
-                  .slice(0, 8)
-                  .toUpperCase()}
-              </p>
-            </div>
-
-            <div className="sm:text-right">
-              <p className="text-sm font-medium text-muted-foreground">
-                Rental period
-              </p>
-
-              <p className="mt-1 font-semibold">
-                {formatDate(
-                  payment.rentalOrder.startDate,
-                )}{" "}
-                —{" "}
-                {formatDate(
-                  payment.rentalOrder.endDate,
-                )}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="overflow-hidden rounded-2xl border border-primary/15 bg-white/70 shadow-sm backdrop-blur dark:bg-card/70">
-          <div className="grid grid-cols-[minmax(0,1fr)_90px_120px] gap-3 border-b bg-gradient-to-r from-primary/10 to-emerald-50 px-4 py-3 text-xs font-bold uppercase tracking-wide text-muted-foreground dark:to-emerald-950/20">
-            <span>Gear ID</span>
-            <span className="text-center">
-              Quantity
-            </span>
-            <span className="text-right">
-              Subtotal
-            </span>
-          </div>
-
-          <div className="divide-y">
-            {payment.rentalOrder.items.map((item) => (
-              <div
-                key={item.id}
-                className="grid grid-cols-[minmax(0,1fr)_90px_120px] gap-3 px-4 py-4 text-sm transition-colors hover:bg-primary/5"
-              >
-                <span className="truncate font-medium">
-                  {item.gearItemId}
-                </span>
-
-                <span className="text-center font-medium">
-                  {item.quantity}
-                </span>
-
-                <span className="text-right font-bold text-primary">
-                  ৳{formatCurrency(item.subtotal)}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-export default async function CustomerPaymentsPage() {
-  const result = await getMyPayments();
-  const payments = result.data;
-
-  const completedPayments = payments.filter(
-    (payment) => payment.status === "COMPLETED",
-  );
-
-  const totalPaid = completedPayments.reduce(
-    (total, payment) =>
-      total + Number(payment.amount),
-    0,
-  );
-
-  const totalItems = payments.reduce(
-    (total, payment) =>
-      total +
-      payment.rentalOrder.items.reduce(
-        (itemTotal, item) =>
-          itemTotal + item.quantity,
-        0,
+  const totalPages =
+    Math.max(
+      1,
+      Math.ceil(
+        filteredPayments.length /
+          PAYMENTS_PER_PAGE,
       ),
-    0,
-  );
+    );
+
+  const safeCurrentPage =
+    Math.min(
+      currentPage,
+      totalPages,
+    );
+
+  const startIndex =
+    (safeCurrentPage - 1) *
+    PAYMENTS_PER_PAGE;
+
+  const paginatedPayments =
+    filteredPayments.slice(
+      startIndex,
+      startIndex +
+        PAYMENTS_PER_PAGE,
+    );
+
+  const hasFilters =
+    Boolean(search) ||
+    status !== "ALL";
 
   return (
     <div className="space-y-8">
-      <div className="relative overflow-hidden rounded-3xl border border-blue-200 bg-gradient-to-br from-blue-100 via-cyan-50 to-emerald-100 px-6 py-8 shadow-sm dark:border-blue-900 dark:from-blue-950/30 dark:via-cyan-950/20 dark:to-emerald-950/30 sm:px-8">
+      {/* Heading */}
+      <section className="relative overflow-hidden rounded-3xl border border-blue-200 bg-gradient-to-br from-blue-100 via-cyan-50 to-emerald-100 px-6 py-8 shadow-sm dark:border-blue-900 dark:from-blue-950/30 dark:via-cyan-950/20 dark:to-emerald-950/30 sm:px-8">
         <div className="absolute -right-20 -top-20 size-60 rounded-full bg-blue-400/20 blur-3xl" />
+
         <div className="absolute -bottom-20 left-1/3 size-52 rounded-full bg-emerald-400/20 blur-3xl" />
 
         <div className="relative">
@@ -292,96 +328,540 @@ export default async function CustomerPaymentsPage() {
           </h1>
 
           <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
-            Review completed Stripe payments,
-            transaction details, rental orders, and
+            Review your Stripe
+            payments, transaction
+            details and rental
             payment activity.
           </p>
         </div>
-      </div>
+      </section>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <Card className="border-blue-200 bg-gradient-to-br from-blue-100 to-cyan-50 shadow-sm dark:border-blue-900 dark:from-blue-950/40 dark:to-cyan-950/20">
+      {/* Statistics */}
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {/* Total payments */}
+        <Card>
           <CardContent className="flex items-center gap-4 p-5">
-            <div className="flex size-12 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-md">
+            <div className="flex size-12 items-center justify-center rounded-2xl bg-blue-600 text-white">
               <Receipt className="size-5" />
             </div>
 
             <div>
-              <p className="text-sm font-medium text-blue-800 dark:text-blue-300">
-                Total payments
+              <p className="text-sm text-muted-foreground">
+                Total Payments
               </p>
 
-              <p className="mt-1 text-3xl font-bold">
+              <p className="text-2xl font-bold">
                 {payments.length}
               </p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-emerald-200 bg-gradient-to-br from-emerald-100 to-green-50 shadow-sm dark:border-emerald-900 dark:from-emerald-950/40 dark:to-green-950/20">
+        {/* Completed */}
+        <Card>
           <CardContent className="flex items-center gap-4 p-5">
-            <div className="flex size-12 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-md">
+            <div className="flex size-12 items-center justify-center rounded-2xl bg-emerald-600 text-white">
               <CheckCircle2 className="size-5" />
             </div>
 
             <div>
-              <p className="text-sm font-medium text-emerald-800 dark:text-emerald-300">
-                Total paid
+              <p className="text-sm text-muted-foreground">
+                Completed
               </p>
 
-              <p className="mt-1 text-3xl font-bold">
-                ৳{formatCurrency(totalPaid)}
+              <p className="text-2xl font-bold">
+                {
+                  completedPayments.length
+                }
               </p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-violet-200 bg-gradient-to-br from-violet-100 to-fuchsia-50 shadow-sm dark:border-violet-900 dark:from-violet-950/40 dark:to-fuchsia-950/20 sm:col-span-2 xl:col-span-1">
+        {/* Pending */}
+        <Card>
           <CardContent className="flex items-center gap-4 p-5">
-            <div className="flex size-12 items-center justify-center rounded-2xl bg-violet-600 text-white shadow-md">
-              <Package className="size-5" />
+            <div className="flex size-12 items-center justify-center rounded-2xl bg-amber-500 text-white">
+              <WalletCards className="size-5" />
             </div>
 
             <div>
-              <p className="text-sm font-medium text-violet-800 dark:text-violet-300">
-                Paid equipment
+              <p className="text-sm text-muted-foreground">
+                Pending
               </p>
 
-              <p className="mt-1 text-3xl font-bold">
-                {totalItems}
+              <p className="text-2xl font-bold">
+                {pendingPayments}
               </p>
             </div>
           </CardContent>
         </Card>
-      </div>
 
-      {payments.length === 0 ? (
-        <Card className="border-dashed border-primary/25 bg-gradient-to-br from-blue-50 via-white to-emerald-50 dark:from-blue-950/20 dark:via-card dark:to-emerald-950/20">
-          <CardContent className="flex min-h-96 flex-col items-center justify-center px-6 py-12 text-center">
-            <div className="flex size-20 items-center justify-center rounded-3xl bg-gradient-to-br from-blue-600 to-emerald-600 text-white shadow-xl">
-              <CreditCard className="size-9" />
+        {/* Total paid */}
+        <Card>
+          <CardContent className="flex items-center gap-4 p-5">
+            <div className="flex size-12 items-center justify-center rounded-2xl bg-violet-600 text-white">
+              <CreditCard className="size-5" />
             </div>
 
-            <h2 className="mt-6 text-2xl font-semibold">
-              No payments yet
-            </h2>
+            <div className="min-w-0">
+              <p className="text-sm text-muted-foreground">
+                Total Paid
+              </p>
 
-            <p className="mt-3 max-w-md text-sm leading-7 text-muted-foreground">
-              Completed rental payments will appear here
-              after you pay through Stripe Checkout.
+              <p className="truncate text-2xl font-bold">
+                ৳
+                {formatCurrency(
+                  totalPaid,
+                )}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* Search and filter */}
+      <Card>
+        <CardHeader className="border-b">
+          <CardTitle>
+            Search and Filter Payments
+          </CardTitle>
+        </CardHeader>
+
+        <CardContent className="p-5">
+          <form
+            action="/customer-dashboard/payments"
+            method="GET"
+            className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px_auto]"
+          >
+            {/* Search */}
+            <div className="relative">
+              <label
+                htmlFor="payment-search"
+                className="sr-only"
+              >
+                Search payments
+              </label>
+
+              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+
+              <Input
+                id="payment-search"
+                name="search"
+                defaultValue={
+                  search
+                }
+                placeholder="Search payment, transaction or rental"
+                className="pl-9"
+              />
+            </div>
+
+            {/* Status */}
+            <div>
+              <label
+                htmlFor="payment-status"
+                className="sr-only"
+              >
+                Filter by payment
+                status
+              </label>
+
+              <select
+                id="payment-status"
+                name="status"
+                defaultValue={
+                  status
+                }
+                className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              >
+                <option value="ALL">
+                  All statuses
+                </option>
+
+                {paymentStatuses.map(
+                  (
+                    paymentStatus,
+                  ) => (
+                    <option
+                      key={
+                        paymentStatus
+                      }
+                      value={
+                        paymentStatus
+                      }
+                    >
+                      {
+                        paymentStatusLabel[
+                          paymentStatus
+                        ]
+                      }
+                    </option>
+                  ),
+                )}
+              </select>
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-2">
+              <Button type="submit">
+                <Search className="size-4" />
+                Apply
+              </Button>
+
+              {hasFilters && (
+                <Button
+                  variant="outline"
+                  asChild
+                >
+                  <Link href="/customer-dashboard/payments">
+                    <X className="size-4" />
+                    Clear
+                  </Link>
+                </Button>
+              )}
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+
+      {/* Payment table */}
+      <Card className="overflow-hidden">
+        <CardHeader className="border-b">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <CardTitle>
+                Payment History
+              </CardTitle>
+
+              <p className="mt-1 text-sm font-normal text-muted-foreground">
+                {totalItems} equipment
+                units across your
+                payment history.
+              </p>
+            </div>
+
+            <Badge variant="secondary">
+              {
+                filteredPayments.length
+              }{" "}
+              {filteredPayments.length ===
+              1
+                ? "result"
+                : "results"}
+            </Badge>
+          </div>
+        </CardHeader>
+
+        <CardContent className="p-0">
+          {paginatedPayments.length ===
+          0 ? (
+            /* Empty state */
+            <div className="flex min-h-80 flex-col items-center justify-center px-6 py-12 text-center">
+              <CreditCard className="size-12 text-muted-foreground" />
+
+              <h2 className="mt-4 text-xl font-semibold">
+                {hasFilters
+                  ? "No matching payments found"
+                  : "No payments yet"}
+              </h2>
+
+              <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">
+                {hasFilters
+                  ? "Try changing your search or selected payment status."
+                  : "Completed rental payments will appear here after checkout."}
+              </p>
+
+              {hasFilters ? (
+                <Button
+                  variant="outline"
+                  className="mt-5"
+                  asChild
+                >
+                  <Link href="/customer-dashboard/payments">
+                    Clear Filters
+                  </Link>
+                </Button>
+              ) : (
+                <Button
+                  className="mt-5"
+                  asChild
+                >
+                  <Link href="/customer-dashboard/rentals">
+                    View My Rentals
+                  </Link>
+                </Button>
+              )}
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="min-w-[130px]">
+                    Payment
+                  </TableHead>
+
+                  <TableHead className="min-w-[180px]">
+                    Transaction
+                  </TableHead>
+
+                  <TableHead className="min-w-[130px]">
+                    Rental
+                  </TableHead>
+
+                  <TableHead>
+                    Method
+                  </TableHead>
+
+                  <TableHead>
+                    Status
+                  </TableHead>
+
+                  <TableHead className="min-w-[130px]">
+                    Paid At
+                  </TableHead>
+
+                  <TableHead>
+                    Items
+                  </TableHead>
+
+                  <TableHead className="text-right">
+                    Amount
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+
+              <TableBody>
+                {paginatedPayments.map(
+                  (payment) => {
+                    const totalUnits =
+                      payment.rentalOrder.items.reduce(
+                        (
+                          total,
+                          item,
+                        ) =>
+                          total +
+                          item.quantity,
+                        0,
+                      );
+
+                    return (
+                      <TableRow
+                        key={
+                          payment.id
+                        }
+                      >
+                        {/* Payment */}
+                        <TableCell>
+                          <p className="font-medium">
+                            #
+                            {payment.id
+                              .slice(
+                                0,
+                                8,
+                              )
+                              .toUpperCase()}
+                          </p>
+
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            {formatDate(
+                              payment.createdAt,
+                            )}
+                          </p>
+                        </TableCell>
+
+                        {/* Transaction */}
+                        <TableCell>
+                          <span className="block max-w-[180px] truncate text-sm">
+                            {
+                              payment.transactionId
+                            }
+                          </span>
+                        </TableCell>
+
+                        {/* Rental */}
+                        <TableCell>
+                          <p className="font-medium">
+                            #
+                            {payment.rentalOrderId
+                              .slice(
+                                0,
+                                8,
+                              )
+                              .toUpperCase()}
+                          </p>
+                        </TableCell>
+
+                        {/* Method */}
+                        <TableCell>
+                          <Badge variant="secondary">
+                            {
+                              payment.method
+                            }
+                          </Badge>
+                        </TableCell>
+
+                        {/* Status */}
+                        <TableCell>
+                          <Badge
+                            variant="outline"
+                            className={
+                              paymentStatusClassName[
+                                payment.status
+                              ]
+                            }
+                          >
+                            {
+                              paymentStatusLabel[
+                                payment.status
+                              ]
+                            }
+                          </Badge>
+                        </TableCell>
+
+                        {/* Paid date */}
+                        <TableCell className="text-sm text-muted-foreground">
+                          {formatDate(
+                            payment.paidAt,
+                          )}
+                        </TableCell>
+
+                        {/* Items */}
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Package className="size-4 text-primary" />
+
+                            <span>
+                              {
+                                totalUnits
+                              }{" "}
+                              {totalUnits ===
+                              1
+                                ? "unit"
+                                : "units"}
+                            </span>
+                          </div>
+                        </TableCell>
+
+                        {/* Amount */}
+                        <TableCell className="text-right font-bold">
+                          ৳
+                          {formatCurrency(
+                            payment.amount,
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  },
+                )}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Pagination */}
+      {filteredPayments.length >
+        0 &&
+        totalPages > 1 && (
+          <div className="flex flex-col items-center justify-between gap-4 rounded-2xl border bg-card p-4 sm:flex-row">
+            <p className="text-sm text-muted-foreground">
+              Showing{" "}
+              {startIndex + 1}–
+              {Math.min(
+                startIndex +
+                  PAYMENTS_PER_PAGE,
+                filteredPayments.length,
+              )}{" "}
+              of{" "}
+              {
+                filteredPayments.length
+              }{" "}
+              payments
             </p>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="space-y-7">
-          {payments.map((payment) => (
-            <PaymentCard
-              key={payment.id}
-              payment={payment}
-            />
-          ))}
-        </div>
-      )}
+
+            <div className="flex items-center gap-2">
+              {/* Previous */}
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={
+                  safeCurrentPage ===
+                  1
+                }
+                asChild={
+                  safeCurrentPage !==
+                  1
+                }
+              >
+                {safeCurrentPage ===
+                1 ? (
+                  <>
+                    <ChevronLeft className="size-4" />
+                    Previous
+                  </>
+                ) : (
+                  <Link
+                    href={createPageUrl(
+                      {
+                        page:
+                          safeCurrentPage -
+                          1,
+                        search,
+                        status,
+                      },
+                    )}
+                  >
+                    <ChevronLeft className="size-4" />
+                    Previous
+                  </Link>
+                )}
+              </Button>
+
+              <Badge variant="outline">
+                Page{" "}
+                {safeCurrentPage}{" "}
+                of {totalPages}
+              </Badge>
+
+              {/* Next */}
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={
+                  safeCurrentPage ===
+                  totalPages
+                }
+                asChild={
+                  safeCurrentPage !==
+                  totalPages
+                }
+              >
+                {safeCurrentPage ===
+                totalPages ? (
+                  <>
+                    Next
+                    <ChevronRight className="size-4" />
+                  </>
+                ) : (
+                  <Link
+                    href={createPageUrl(
+                      {
+                        page:
+                          safeCurrentPage +
+                          1,
+                        search,
+                        status,
+                      },
+                    )}
+                  >
+                    Next
+                    <ChevronRight className="size-4" />
+                  </Link>
+                )}
+              </Button>
+            </div>
+          </div>
+        )}
     </div>
   );
 }
