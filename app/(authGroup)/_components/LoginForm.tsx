@@ -273,18 +273,9 @@ export function LoginForm() {
                 errors.password,
               )}
             >
-              <div className="flex items-center justify-between">
-                <FieldLabel htmlFor="password">
-                  Password
-                </FieldLabel>
-
-                <Link
-                  href="/forgot-password"
-                  className="text-xs font-medium text-primary hover:underline"
-                >
-                  Forgot password?
-                </Link>
-              </div>
+             <FieldLabel htmlFor="password">
+           Password
+           </FieldLabel>
 
               <div className="relative">
                 <Input

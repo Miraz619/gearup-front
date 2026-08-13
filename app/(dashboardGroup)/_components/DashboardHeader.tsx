@@ -166,7 +166,7 @@ export function DashboardHeader({
         {/* Right side */}
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           {/* Notification */}
-          <button
+          {/* <button
             type="button"
             aria-label="Notifications"
             className="relative flex size-9 items-center justify-center rounded-lg border bg-background text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
@@ -174,7 +174,7 @@ export function DashboardHeader({
             <Bell className="size-4" />
 
             <span className="absolute right-2 top-2 size-1.5 rounded-full bg-primary" />
-          </button>
+          </button> */}
 
           {/* Profile dropdown */}
           <DropdownMenu>

@@ -163,14 +163,13 @@ export function Footer() {
             </h3>
 
             <div className="mt-5 space-y-4 text-sm text-muted-foreground">
-              <Link
-                href="mailto:support@gearup.com"
-                className="flex items-start gap-3 transition-colors hover:text-foreground"
-              >
-                <Mail className="mt-0.5 size-4 shrink-0" />
-
-                <span>support@gearup.com</span>
-              </Link>
+             <Link
+  href="/contact"
+  className="flex items-start gap-3 transition-colors hover:text-foreground"
+>
+  <Mail className="mt-0.5 size-4 shrink-0" />
+  <span>Contact Support</span>
+</Link>
 
               <div className="flex items-start gap-3">
                 <MapPin className="mt-0.5 size-4 shrink-0" />
